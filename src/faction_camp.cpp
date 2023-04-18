@@ -63,6 +63,7 @@
 #include "overmapbuffer.h"
 #include "pimpl.h"
 #include "player_activity.h"
+#include <player_difficulty.h>
 #include "point.h"
 #include "recipe.h"
 #include "recipe_groups.h"
@@ -4999,8 +5000,9 @@ bool basecamp::distribute_food()
         if( it.rotten() ) {
             return false;
         }
-        const int kcal = it.get_comestible()->default_nutrition.kcal() * it.count() * rot_multip( it,
-                         container );
+        const int kcal = player_difficulty::getAverageJoe().compute_effective_nutrients(
+                             it ).kcal() * it.count() * rot_multip( it,
+                                     container );
         if( kcal <= 0 ) {
             // can happen if calories is low and rot is high.
             return false;

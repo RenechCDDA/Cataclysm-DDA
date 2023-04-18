@@ -55,6 +55,11 @@ class player_difficulty
             return instance;
         }
 
+        static npc &getAverageJoe() {
+            static npc average;
+            return average;
+        }
+
         // call to get the details out
         std::string difficulty_to_string( const avatar &u ) const;
 };
