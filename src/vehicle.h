@@ -1152,6 +1152,12 @@ class vehicle
         bool has_part( const tripoint &pos, const std::string &flag, bool enabled = false ) const;
 
         /**
+         *  We create a vector here, where we check vehicle::can_mount, so we
+         *  can use it elsewhere.
+         */
+		std::vector<std::pair<const vpart_id, std::string>> cannot_mount();
+
+        /**
          *  Get all enabled, available, unbroken vehicle parts at specified position
          *  @param pos position to check
          *  @param flag if set only flags with this part will be considered

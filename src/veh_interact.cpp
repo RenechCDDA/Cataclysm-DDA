@@ -873,6 +873,12 @@ bool veh_interact::update_part_requirements()
     }
     nmsg += res.second;
 
+	if (!veh->vehicle::can_mount(point_zero, sel_vpart_info->get_id()) ) {
+		if ( sel_vpart_info->get_id() = veh->cannot_mount().back().first ) {
+	nmsg += veh->cannot_mount().back().second;
+		}
+	}
+
     sel_vpart_info->format_description( nmsg, c_light_gray, getmaxx( w_msg ) - 4 );
 
     msg = colorize( nmsg, c_light_gray );

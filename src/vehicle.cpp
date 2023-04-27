@@ -1139,6 +1139,11 @@ bool vehicle::is_structural_part_removed() const
     return false;
 }
 
+std::vector<std::pair<const vpart_id, std::string>> vehicle::cannot_mount()
+{
+	return std::vector<std::pair<const vpart_id, std::string>>();
+}
+
 /**
  * Returns whether or not the vehicle part with the given id can be mounted in
  * the specified square.
@@ -1148,14 +1153,20 @@ bool vehicle::is_structural_part_removed() const
  */
 bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
 {
+	std::vector<std::pair<const vpart_id, std::string>> cannot_mount;
+	std::string temp_string;
     //The part has to actually exist.
     if( !id.is_valid() ) {
+		temp_string = _( "Invalid ID! This should never appear." );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
 
     //It also has to be a real part, not the null part
     const vpart_info &part = id.obj();
     if( part.has_flag( "NOINSTALL" ) ) {
+		temp_string = _( "Part cannot be installed!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
 
@@ -1164,14 +1175,20 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
     //First part in an empty square MUST be a structural part or be an appliance
     if( parts_in_square.empty() &&  part.location != part_location_structure &&
         !part.has_flag( flag_APPLIANCE ) ) {
+		temp_string = _( "There's no structure to support it!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
     // If its a part that harnesses animals that don't allow placing on it.
     if( !parts_in_square.empty() && part_info( parts_in_square[0] ).has_flag( "ANIMAL_CTRL" ) ) {
+		temp_string = _( "There's an animal harness in the way!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
     //No other part can be placed on a protrusion
     if( !parts_in_square.empty() && part_info( parts_in_square[0] ).has_flag( "PROTRUSION" ) ) {
+		temp_string = _( "An existing vehicle part is protruding!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
 
@@ -1182,11 +1199,15 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
         //Parts with no location can stack with each other (but not themselves)
         if( part.get_id() == other_part.get_id() ||
             ( !part.location.empty() && part.location == other_part.location ) ) {
+		temp_string = _( "Another part shares the same location!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
             return false;
         }
         // Until we have an interface for handling multiple components with CARGO space,
         // exclude them from being mounted in the same tile.
         if( part.has_flag( "CARGO" ) && other_part.has_flag( "CARGO" ) ) {
+		temp_string = _( "Can't have two cargo parts on the same tile!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
             return false;
         }
 
@@ -1201,6 +1222,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
             !has_structural_part( dp + point_south ) &&
             !has_structural_part( dp + point_west ) &&
             !has_structural_part( dp + point_north ) ) {
+		temp_string = _( "Part needs to be adjacent to or on existing structure" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
             return false;
         }
     }
@@ -1208,6 +1231,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
     // only one exclusive engine allowed
     std::string empty;
     if( has_engine_conflict( &part, empty ) ) {
+		temp_string = _( "Only one exclusive engine allowed!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
         return false;
     }
 
@@ -1222,6 +1247,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
                 }
             }
             if( !anchor_found ) {
+		temp_string = _( "Part requires flag from another part!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
                 return false;
             }
         }
@@ -1231,6 +1258,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
     if( part.has_flag( "VISION" ) && !part.has_flag( "CAMERA" ) ) {
         for( const int &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "OPAQUE" ) ) {
+		temp_string = _( "Mirrors cannot be mounted on opaque parts!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
                 return false;
             }
         }
@@ -1240,6 +1269,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
         for( const int &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "VISION" ) &&
                 !part_info( elem ).has_flag( "CAMERA" ) ) {
+		temp_string = _( "Opaque parts cannot be mounted on mirror parts!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
                 return false;
             }
         }
@@ -1249,6 +1280,8 @@ bool vehicle::can_mount( const point &dp, const vpart_id &id ) const
     if( part.has_flag( "TURRET_MOUNT" ) ) {
         for( const int &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "TURRET_MOUNT" ) ) {
+		temp_string = _( "You can't install a turret on a turret!" );
+		cannot_mount.push_back(std::pair<const vpart_id, std::string>(id, temp_string));
                 return false;
             }
         }
