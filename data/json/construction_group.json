@@ -1723,5 +1723,10 @@
     "type": "construction_group",
     "id": "obstacle_rock",
     "name": "Build a Rocky Obstacle"
+  },
+  {
+    "type": "construction_group",
+    "id": "digester",
+    "name": "Build a biogas digester"
   }
 ]
