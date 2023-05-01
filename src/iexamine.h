@@ -111,6 +111,7 @@ void shrub_wildveggies( Character &you, const tripoint &examp );
 void part_con( Character &you, const tripoint &examp );
 void water_source( Character &, const tripoint &examp );
 void finite_water_source( Character &, const tripoint &examp );
+void digester_empty( Character &you, const tripoint &examp );
 void kiln_empty( Character &you, const tripoint &examp );
 void kiln_full( Character &you, const tripoint &examp );
 void arcfurnace_empty( Character &you, const tripoint &examp );
