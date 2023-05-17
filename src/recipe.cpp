@@ -457,6 +457,18 @@ void recipe::load( const JsonObject &jo, const std::string &src )
         jo.throw_error_at( "type", "unknown recipe type" );
     }
 
+
+	duped_idents.emplace(ident_, src);
+auto range = duped_idents.equal_range(ident_);
+
+    for (auto it = range.first; it != range.second; ++it) {
+		auto checked = checked_recipes.size();
+		checked_recipes.emplace(it->first);
+		if ( checked == checked_recipes.size() ) {
+			debugmsg("Duplicated recipe %s from source %s!", it->first.c_str(), it->second);
+	}
+	}
+
     const requirement_id req_id( "inline_" + type + "_" + ident_.str() );
     requirement_data::load_requirement( jo, req_id );
     reqs_internal.emplace_back( req_id, 1 );

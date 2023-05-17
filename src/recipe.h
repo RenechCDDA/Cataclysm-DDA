@@ -262,6 +262,8 @@ class recipe
         }
 
         void load( const JsonObject &jo, const std::string &src );
+		std::multimap<recipe_id, std::string> duped_idents;
+		std::set<recipe_id> checked_recipes;
         void finalize();
 
         /** Returns a non-empty string describing an inconsistency (if any) in the recipe. */
