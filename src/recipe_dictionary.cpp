@@ -479,7 +479,23 @@ void recipe_dictionary::finalize_internal( std::map<recipe_id, recipe> &obj )
     }
     // remove any blacklisted or invalid recipes...
     delete_if( []( const recipe & elem ) {
+        if( elem.is_nested() ) {
+            for( const auto &nest : elem.nested_category_data ) {
+                if( nest->is_blacklisted() ) {
+                    // Erase the nested recipe
+                    erase( elem.nested_category_data.find( nest ) );
+                    // Don't erase the elem (nested category) because it may still contain valid recipes
+                    return false;
+                }
+            }
+        }
         if( elem.is_blacklisted() ) {
+            return true;
+        }
+
+        // Erase any categories that are empty after removing blacklisted contents
+        // This check doesn't actually work because is_nested returns true only if size is > 0
+        if( elem.is_nested() && elem.nested_category_data.size() == 0 ) {
             return true;
         }
 
