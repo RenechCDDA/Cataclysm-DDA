@@ -484,10 +484,10 @@ void recipe_dictionary::finalize_internal( std::map<recipe_id, recipe> &obj )
                 if( nest->is_blacklisted() ) {
                     // Erase the nested recipe
                     erase( elem.nested_category_data.find( nest ) );
-                    // Don't erase the elem (nested category) because it may still contain valid recipes
-                    return false;
                 }
             }
+            // Don't erase the elem (nested category) because it may still contain valid recipes
+            return false;
         }
         if( elem.is_blacklisted() ) {
             return true;
