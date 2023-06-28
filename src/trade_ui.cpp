@@ -129,7 +129,7 @@ trade_ui::trade_ui( party_t &you, npc &trader, currency_t cost, std::string titl
             _panes[_trader]->add_nearby_items( PICKUP_RANGE );
         } else {
             std::unordered_set<tripoint> const src =
-                zmgr.get_point_set_loot( trader.get_location(), PICKUP_RANGE, trader.get_fac_id() );
+                zmgr.get_point_set_loot( trader.get_location(), PICKUP_RANGE, PICKUP_RANGE, trader.get_fac_id() );
 
             for( tripoint const &pt : src ) {
                 _panes[_trader]->add_map_items( pt );

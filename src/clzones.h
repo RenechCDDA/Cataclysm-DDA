@@ -36,6 +36,7 @@ const std::string type_fac_hash_str = "__FAC__";
 
 //Generic activity: maximum search distance for zones, constructions, etc.
 constexpr int ACTIVITY_SEARCH_DISTANCE = 60;
+constexpr int ACTIVITY_SEARCH_DISTANCE_Z = 1;
 
 class zone_type
 {
@@ -548,9 +549,9 @@ class zone_manager
         void rotate_zones( map &target_map, int turns );
         // list of tripoints of zones that are loot zones only
         std::unordered_set<tripoint> get_point_set_loot(
-            const tripoint_abs_ms &where, int radius, const faction_id &fac = your_fac ) const;
+            const tripoint_abs_ms &where, int radius_xy, int radius_z, const faction_id &fac = your_fac ) const;
         std::unordered_set<tripoint> get_point_set_loot(
-            const tripoint_abs_ms &where, int radius, bool npc_search,
+            const tripoint_abs_ms &where, int radius, int radius_z, bool npc_search,
             const faction_id &fac = your_fac ) const;
 
         // 'direct' access to zone_manager::zones, giving direct access was nono

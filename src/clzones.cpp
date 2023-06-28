@@ -775,17 +775,17 @@ std::unordered_set<tripoint_abs_ms> zone_manager::get_point_set( const zone_type
 }
 
 std::unordered_set<tripoint> zone_manager::get_point_set_loot( const tripoint_abs_ms &where,
-        int radius, const faction_id &fac ) const
+        int radius, int radius_z, const faction_id &fac ) const
 {
-    return get_point_set_loot( where, radius, false, fac );
+    return get_point_set_loot( where, radius, radius_z, false, fac );
 }
 
 std::unordered_set<tripoint> zone_manager::get_point_set_loot( const tripoint_abs_ms &where,
-        int radius, bool npc_search, const faction_id &fac ) const
+        int radius, int radius_z, bool npc_search, const faction_id &fac ) const
 {
     std::unordered_set<tripoint> res;
     map &here = get_map();
-    for( const tripoint &elem : here.points_in_radius( here.getlocal( where ), radius, radius ) ) {
+    for( const tripoint &elem : here.points_in_radius( here.getlocal( where ), radius, radius_z ) ) {
         const zone_data *zone = get_zone_at( here.getglobal( elem ), true, fac );
         if( zone == nullptr ) {
             continue;
