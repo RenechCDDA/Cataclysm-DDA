@@ -479,27 +479,24 @@ static std::set<tripoint> spell_effect_area( const spell &sp, const tripoint &ta
     return targets;
 }
 
-static void add_effect_to_target( const tripoint &target, const spell &sp, Creature &caster )
+static void add_effect_to_target( Creature &target, const spell &sp, Creature &caster )
 {
     const int dur_moves = sp.duration( caster );
     const time_duration dur_td = time_duration::from_moves( dur_moves );
 
-    creature_tracker &creatures = get_creature_tracker();
-    Creature *const critter = creatures.creature_at<Creature>( target );
-    Character *const guy = creatures.creature_at<Character>( target );
     efftype_id spell_effect( sp.effect_data() );
     bool bodypart_effected = false;
 
-    if( guy ) {
-        for( const bodypart_id &bp : guy->get_all_body_parts() ) {
+    if( !target.is_monster() ) {
+        for( const bodypart_id &bp : target.get_all_body_parts() ) {
             if( sp.bp_is_affected( bp.id() ) ) {
-                guy->add_effect( spell_effect, dur_td, bp, sp.has_flag( spell_flag::PERMANENT ) );
+                target.add_effect( spell_effect, dur_td, bp, sp.has_flag( spell_flag::PERMANENT ) );
                 bodypart_effected = true;
             }
         }
     }
     if( !bodypart_effected ) {
-        critter->add_effect( spell_effect, dur_td );
+        target.add_effect( spell_effect, dur_td );
     }
 }
 
@@ -555,7 +552,7 @@ static void damage_targets( const spell &sp, Creature &caster,
         }
 
         if( !sp.effect_data().empty() ) {
-            add_effect_to_target( target, sp, caster );
+            add_effect_to_target( *cr, sp, caster );
         }
         if( sp.damage( caster ) > 0 ) {
             for( damage_unit &val : atk.proj.impact.damage_units ) {
