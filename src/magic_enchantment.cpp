@@ -247,6 +247,27 @@ bool enchantment::is_active( const Character &guy, const bool active ) const
     return false;
 }
 
+bool enchantment::is_active( const Creature &mon, const bool active ) const
+{
+    if( active_conditions.second == condition::ACTIVE ) {
+        return active;
+    }
+
+    if( active_conditions.second == condition::INACTIVE ) {
+        return !active;
+    }
+
+    if( active_conditions.second == condition::ALWAYS ) {
+        return true;
+    }
+
+    if( active_conditions.second == condition::DIALOG_CONDITION ) {
+        dialogue d( get_talker_for( mon ), nullptr );
+        return dialog_condition( d );
+    }
+    return false;
+}
+
 bool enchantment::active_wield() const
 {
     return active_conditions.first == has::HELD || active_conditions.first == has::WIELD;
@@ -613,6 +634,40 @@ void enchant_cache::force_add( const enchantment &rhs, const Character &guy )
 
     for( const trait_id &branch : rhs.mutations ) {
         mutations.emplace( branch );
+    }
+
+    for( const std::pair<const time_duration, std::vector<fake_spell>> &act_pair :
+         rhs.intermittent_activation ) {
+        for( const fake_spell &fake : act_pair.second ) {
+            intermittent_activation[act_pair.first].emplace_back( fake );
+        }
+    }
+
+    details.emplace_back( rhs.name.translated(), rhs.description.translated() );
+}
+
+void enchant_cache::force_add( const enchantment &rhs, const Creature &mon )
+{
+    dialogue d( get_talker_for( mon ), nullptr );
+    for( const std::pair<const enchant_vals::mod, dbl_or_var> &pair_values :
+         rhs.values_add ) {
+        values_add[pair_values.first] += pair_values.second.evaluate( d );
+    }
+    for( const std::pair<const enchant_vals::mod, dbl_or_var> &pair_values :
+         rhs.values_multiply ) {
+        // values do not multiply against each other, they add.
+        // so +10% and -10% will add to 0%
+        values_multiply[pair_values.first] += pair_values.second.evaluate( d );
+    }
+
+    hit_me_effect.insert( hit_me_effect.end(), rhs.hit_me_effect.begin(), rhs.hit_me_effect.end() );
+
+    hit_you_effect.insert( hit_you_effect.end(), rhs.hit_you_effect.begin(), rhs.hit_you_effect.end() );
+
+    ench_effects.insert( rhs.ench_effects.begin(), rhs.ench_effects.end() );
+
+    if( rhs.emitter ) {
+        emitter = rhs.emitter;
     }
 
     for( const std::pair<const time_duration, std::vector<fake_spell>> &act_pair :

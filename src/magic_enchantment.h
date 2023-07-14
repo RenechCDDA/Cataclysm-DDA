@@ -164,6 +164,7 @@ class enchantment
         // this enchantment has a valid item independent conditions
         // @active means the container for the enchantment is active, for comparison to active flag.
         bool is_active( const Character &guy, bool active ) const;
+        bool is_active( const Creature &mon, bool active ) const;
 
         // this enchantment is active when wielded.
         // shows total conditional values, so only use this when Character is not available
@@ -234,6 +235,7 @@ class enchant_cache : public enchantment
         units::mass modify_value( enchant_vals::mod mod_val, units::mass value ) const;
         // adds two enchantments together and ignores their conditions
         void force_add( const enchantment &rhs, const Character &guy );
+        void force_add( const enchantment &rhs, const Creature &mon );
         void force_add( const enchant_cache &rhs );
 
         // modifies character stats, or does other passive effects

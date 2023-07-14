@@ -1287,6 +1287,23 @@ class Creature : public viewer
         void add_damage_over_time( const damage_over_time_data &DoT );
         void process_damage_over_time();
 
+        // gets a singular enchantment that is an amalgamation of all items that have active enchantments
+        enchant_cache get_active_enchantment_cache( const Creature &monst ) const;
+
+        // recalculates enchantment cache by iterating through all effects
+        void recalculate_enchantment_cache();
+
+        // gets add and mult value from enchantment cache
+        double calculate_by_enchantment( double modify, enchant_vals::mod value,
+                                         bool round_output = false ) const;
+
+        /** Recalculates HP after enchantment */
+        int recalc_hp();
+
+        // a cache of all active enchantment values.
+        // is recalculated every turn in Creature::recalculate_enchantment_cache
+        pimpl<enchant_cache> enchantment_cache;
+
         static void load_hit_range( const JsonObject & );
         // Empirically determined by "synthetic_range_test" in tests/ranged_balance.cpp.
         static std::vector <int> dispersion_for_even_chance_of_good_hit;

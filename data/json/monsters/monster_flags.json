@@ -135,6 +135,11 @@
     "//": "Absorbs physical damage to a great degree"
   },
   {
+    "id": "PHOTOPHOBIC",
+    "type": "monster_flag",
+    "//": "Severely weakened in sufficient light (applies photophobia effect)"
+  },
+  {
     "id": "SUNDEATH",
     "type": "monster_flag",
     "//": "Dies in full sunlight"

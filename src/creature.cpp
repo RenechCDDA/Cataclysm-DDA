@@ -38,6 +38,7 @@
 #include "lightmap.h"
 #include "line.h"
 #include "localized_comparator.h"
+#include "make_static.h"
 #include "map.h"
 #include "map_iterator.h"
 #include "mapdata.h"
@@ -3131,6 +3132,51 @@ std::vector <int> Creature::dispersion_for_even_chance_of_good_hit = { {
         33, 33, 32, 30, 30, 30, 30, 29, 28
     }
 };
+
+int Creature::recalc_hp()
+{
+
+    float hp_mod = 1.0f + enchantment_cache->get_value_multiply( enchant_vals::mod::MAX_HP );
+    float hp_adjustment = enchantment_cache->get_value_add( enchant_vals::mod::MAX_HP );
+    int hp_total = 0;
+    for( const std::pair<const bodypart_str_id, bodypart> &elem : get_body() ) {
+        hp_total += elem.second.get_hp_max();
+    }
+
+	return hp_total;
+}
+
+
+void Creature::recalculate_enchantment_cache()
+{
+
+    // start by resetting the cache to all inventory items
+    *enchantment_cache;
+
+	// Basically, just calculate enchantments from effects!
+    for( const auto &elem : *effects ) {
+        for( const enchantment_id &ench_id : elem.first->enchantments ) {
+            const enchantment &ench = ench_id.obj();
+            if( ench.is_active( *this, true ) ) {
+                enchantment_cache->force_add( ench, *this );
+            }
+        }
+    }
+
+
+    recalc_hp();
+}
+
+double Creature::calculate_by_enchantment( double modify, enchant_vals::mod value,
+        bool round_output ) const
+{
+    modify += enchantment_cache->get_value_add( value );
+    modify *= 1.0 + enchantment_cache->get_value_multiply( value );
+    if( round_output ) {
+        modify = std::round( modify );
+    }
+    return modify;
+}
 
 void Creature::load_hit_range( const JsonObject &jo )
 {
