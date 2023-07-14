@@ -2510,7 +2510,18 @@ void monster::reset_bonuses()
 
 void monster::reset_stats()
 {
-    // Nothing here yet
+    recalc_speed_bonus();
+}
+
+void monster::recalc_speed_bonus()
+{
+    speed_bonus = 0;
+    const int prev_speed_bonus = get_speed_bonus();
+    const int speed_bonus_with_enchant = std::round( enchantment_cache->modify_value(
+            enchant_vals::mod::SPEED,
+            get_speed() ) - get_speed_base() );
+    int enchantment_speed_bonus = speed_bonus_with_enchant - prev_speed_bonus;
+    mod_speed_bonus( enchantment_speed_bonus );
 }
 
 void monster::reset_special( const std::string &special_name )
@@ -3040,9 +3051,6 @@ void monster::process_one_effect( effect &it, bool is_new )
     };
 
     mod_speed_bonus( get_effect( "SPEED", reduced ) );
-	mod_speed_bonus( std::round( enchantment_cache->modify_value(
-            enchant_vals::mod::SPEED,
-            get_speed() ) - get_speed_base() ) );
 	debugmsg("speed is %s", get_speed() );
     mod_dodge_bonus( get_effect( "DODGE", reduced ) );
     mod_hit_bonus( get_effect( "HIT", reduced ) );
