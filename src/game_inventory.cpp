@@ -71,11 +71,10 @@ static const bionic_id bio_painkiller( "bio_painkiller" );
 
 static const flag_id json_flag_CALORIES_INTAKE( "CALORIES_INTAKE" );
 
+static const itype_id itype_anesthetic( "anesthetic" );
 static const itype_id itype_fitness_band( "fitness_band" );
 
 static const json_character_flag json_flag_PAIN_IMMUNE( "PAIN_IMMUNE" );
-
-static const quality_id qual_ANESTHESIA( "ANESTHESIA" );
 
 static const requirement_id requirement_data_anesthetic( "anesthetic" );
 
@@ -2333,11 +2332,11 @@ static item_location autodoc_internal( Character &you, Character &patient,
         } else {
             const inventory &crafting_inv = you.crafting_inventory();
             std::vector<const item *> a_filter = crafting_inv.items_with( []( const item & it ) {
-                return it.has_quality( qual_ANESTHESIA );
+                return it.charges_of( itype_anesthetic );
             } );
             for( const item *anesthesia_item : a_filter ) {
-                if( anesthesia_item->ammo_remaining() >= 1 ) {
-                    drug_count += anesthesia_item->ammo_remaining();
+                if( anesthesia_item->charges_of( itype_anesthetic ) >= 1 ) {
+                    drug_count += anesthesia_item->charges;
                 }
             }
             hint = string_format( _( "<color_yellow>Available anesthetic: %i mL</color>" ), drug_count );

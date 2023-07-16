@@ -5450,7 +5450,7 @@ void iexamine::autodoc( Character &you, const tripoint &examp )
                 const time_duration duration = difficulty * 20_minutes;
                 patient.introduce_into_anesthesia( duration, installer, needs_anesthesia );
                 if( needs_anesthesia ) {
-                    you.consume_tools( anesth_kit, volume_anesth );
+                    you.consume_anesth_requirement( bid->itype().obj(), you );
                 }
                 installer.mod_moves( -to_moves<int>( 1_minutes ) );
                 patient.uninstall_bionic( *bionics[bionic_index], installer, true );
