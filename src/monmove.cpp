@@ -1685,7 +1685,7 @@ bool monster::attack_at( const tripoint &p )
     Character &player_character = get_player_character();
     const bool sees_player = sees( player_character );
     // Targeting player location
-    if( p == player_character.pos() ) {
+    if( p == player_character.pos() && get_map().valid_move( this->pos(), p ) ) {
         if( sees_player ) {
             return melee_attack( player_character );
         } else {
