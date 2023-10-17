@@ -5700,6 +5700,31 @@ bool map::could_see_items( const tripoint &p, const tripoint &from ) const
     return true;
 }
 
+std::map<itype_id, int> map::num_items_at( const tripoint_bub_ms &p ) const
+{
+    std::map<itype_id, int> items_map;
+    if( !inbounds( p ) ) {
+        debugmsg( "Tried to get point outside the reality bubble! Invalid tripoint" );
+        return items_map;
+    }
+
+    map &here = get_map();
+    map_stack items = here.i_at( p );
+
+    for( map_stack::iterator iter = items.begin(); iter != items.end(); ) {
+        item &itm = *iter;
+        std::map<itype_id, int>::iterator it = items_map.find( itm.typeId() );
+        if( it == items_map.end() ) {
+            // Relies on item::count() to handle charges!
+            items_map.emplace( itm.typeId(), itm.count() );
+        } else if( !itm.count_by_charges() ) {
+            it->second++;
+        }
+    }
+
+    return items_map;
+}
+
 bool map::has_items( const tripoint &p ) const
 {
     if( !inbounds( p ) ) {

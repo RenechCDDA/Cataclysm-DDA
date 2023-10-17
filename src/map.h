@@ -887,6 +887,14 @@ class map
         bool could_see_items( const tripoint &p, const Creature &who ) const;
         bool could_see_items( const tripoint &p, const tripoint &from ) const;
         /**
+         * Returns a std::map container of items and their integer amount at the given coordinate
+         * TODO: Returns charges for items with charges?
+         * Key value is itype_id
+         * TODO: Make sure this works before comitting/merging :^) (if you see me it shouldn't be merged)
+         * Returns an empty map if a coordinate outside the reality bubble is given
+         */
+        std::map<itype_id, int> num_items_at( const tripoint_bub_ms &p ) const;
+        /**
          * Checks for existence of items. Faster than i_at(p).empty
          */
         // TODO: fix point types (remove the first overload)
