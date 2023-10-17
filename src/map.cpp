@@ -5720,6 +5720,7 @@ std::map<itype_id, int> map::num_items_at( const tripoint_bub_ms &p ) const
         } else if( !itm.count_by_charges() ) {
             it->second++;
         }
+		iter++;
     }
 
     return items_map;

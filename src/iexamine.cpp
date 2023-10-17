@@ -5936,35 +5936,62 @@ void iexamine::mill_finalize( Character &, const tripoint &examp, const time_poi
         return;
     }
 
+    // Is this a safe way to get a tripoint_bub_ms? It sure doesn't feel like it! Stolen from somewhere in map.cpp's vehicle-related functions...
+    const tripoint_bub_ms p_bub( examp );
+    std::map<itype_id, int> items_map = here.num_items_at( p_bub );
+
     for( map_stack::iterator iter = items.begin(); iter != items.end(); ) {
         item &it = *iter;
         if( it.type->milling_data ) {
-            it.calc_rot_while_processing( milling_time );
-            const islot_milling &mdata = *it.type->milling_data;
-            const int resulting_charges = get_milled_amount( it.typeId(), examp, here );
-            // if not enough material, just remove the item (0 loops)
-            // (may happen if the player did not add enough charges to the mill
-            // or if the conversion rate is changed between versions)
-            for( int i = 0; i < resulting_charges; i++ ) {
+            std::map<itype_id, int>::iterator mapped_item = items_map.find( it.typeId() );
+            // The iterator has found an item that can be milled, and we haven't finished creating outputs for all known inputs that existed pre-iteration
+            if( mapped_item != items_map.end() ) {
+                const islot_milling &mdata = *it.type->milling_data;
+                // Modify item_maps to remove that many number of the item we're processing
+                // (e.g. if we need 10 input nuts, remove 10 nuts from its count in the map)
+                if( mdata.conversion_rate_ < 1.0 ) {
+                    // Example math: conversion rate of 0.10 results in 1 / 0.1 = 10 counts being removed from the map.
+                    mapped_item->second -= 1 / mdata.conversion_rate_;
+                } else {
+                    mapped_item->second--;
+                }
+                // Now make one output or set of outputs...
                 item result( mdata.into_, start_time + milling_time );
                 result.components.add( it );
-                // copied from item::inherit_flags, which can not be called here because it requires a recipe.
                 for( const flag_id &f : it.type->get_flags() ) {
                     if( f->craft_inherit() ) {
                         result.set_flag( f );
                     }
                 }
-                result.recipe_charges = resulting_charges;
-                // Set flag to tell set_relative_rot() to calc from bday not now
+                // FIXME: What should this be when conversion_ratio is below 1?!
+                // This is used for determining calories so we can't spitball this
+                result.recipe_charges = mdata.conversion_rate_;
                 result.set_flag( flag_PROCESSING_RESULT );
                 result.set_relative_rot( it.get_relative_rot() );
                 result.unset_flag( flag_PROCESSING_RESULT );
-                here.add_item( examp, result );
+                int num_to_make = 1;
+                // Handle conversions which are > 1 but not integers...
+                if( mdata.conversion_rate_ > 1.0 ) {
+                    double converted_amount, fractional_amount, integer_amount;
+                    converted_amount = mdata.conversion_rate_;
+                    fractional_amount = modf( converted_amount, &integer_amount );
+                    num_to_make = integer_amount;
+                    // e.g. 1.25 leaves a .25 fractional_amount
+                    // .25 fractional_amount == .25 in 1 == 1 in 4 chance of making another. This is *random* so not guaranteed...
+                    if( x_in_y( fractional_amount, 1 ) ) {
+                        num_to_make++;
+                    }
+                }
+                // FIXME: This is only making 1 when num_to_make > 1 (???)
+                here.add_item( examp, result, num_to_make );
             }
-            iter = items.erase( iter );
-        } else {
-            ++iter;
         }
+        // *Always* erase the item, increment iterator
+        iter = items.erase( iter );
+        // Potential problem for conversion rates below 1.0:
+        // Next iteration ---> Item may have different birthday/relative rot ---> results should have different relative rot values?!
+        // So 10 nuts with 10 different rot amounts gets 1 resulting rot amount, but simply based on whichever nut the map iterator counts first.
+        // This should average out, assuming that the order of access is random (or random enough), but... I have no idea if it does randomly iterate.
     }
     here.furn_set( examp, next_mill_type );
 }
