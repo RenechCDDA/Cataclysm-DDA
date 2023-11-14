@@ -56,6 +56,7 @@ static const zone_type_id zone_type_CAMP_FOOD( "CAMP_FOOD" );
 static const zone_type_id zone_type_CAMP_STORAGE( "CAMP_STORAGE" );
 static const zone_type_id zone_type_CHOP_TREES( "CHOP_TREES" );
 static const zone_type_id zone_type_CONSTRUCTION_BLUEPRINT( "CONSTRUCTION_BLUEPRINT" );
+static const zone_type_id zone_type_CONSUMABLES( "CONSUMABLES" );
 static const zone_type_id zone_type_DISASSEMBLE( "DISASSEMBLE" );
 static const zone_type_id zone_type_FARM_PLOT( "FARM_PLOT" );
 static const zone_type_id zone_type_FISHING_SPOT( "FISHING_SPOT" );
@@ -119,6 +120,9 @@ zone_manager::zone_manager()
     types.emplace( zone_type_CONSTRUCTION_BLUEPRINT,
                    zone_type( to_translation( "Construction: Blueprint" ),
                               to_translation( "Designate a blueprint zone for construction." ) ) );
+    types.emplace( zone_type_CONSUMABLES,
+                   zone_type( to_translation( "Consumables" ),
+                              to_translation( "Designate an area holding consumables for auto-replenishment." ) ) );
     types.emplace( zone_type_FARM_PLOT,
                    zone_type( to_translation( "Farm: Plot" ),
                               to_translation( "Designate a farm plot for tilling and planting." ) ) );

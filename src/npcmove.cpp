@@ -143,6 +143,7 @@ static const skill_id skill_firstaid( "firstaid" );
 static const trait_id trait_IGNORE_SOUND( "IGNORE_SOUND" );
 static const trait_id trait_RETURN_TO_START_POS( "RETURN_TO_START_POS" );
 
+static const zone_type_id zone_type_CONSUMABLES( "CONSUMABLES" );
 static const zone_type_id zone_type_NO_NPC_PICKUP( "NO_NPC_PICKUP" );
 static const zone_type_id zone_type_NPC_RETREAT( "NPC_RETREAT" );
 
@@ -2995,10 +2996,15 @@ void npc::find_item()
                 return;
             }
         }
+        zone_manager &mgr = zone_manager::get_manager();
+        map &here = get_map();
         if( ::good_for_pickup( it, *this ) ) {
-            wanted_item_pos = p;
-            wanted = &it;
-            best_value = has_item_whitelist() ? 1000 : value( it );
+			// Exclude items inside CONSUMABLES zone.
+            if( !mgr.has( zone_type_CONSUMABLES, here.getglobal( p ), your_fac ) ) {
+                wanted_item_pos = p;
+                wanted = &it;
+                best_value = has_item_whitelist() ? 1000 : value( it );
+            }
         }
     };
 
