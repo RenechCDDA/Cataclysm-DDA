@@ -1190,8 +1190,25 @@ void reveal_map_actor::reveal_targets( const tripoint_abs_omt &center,
 {
     const auto places = overmap_buffer.find_all( center, target.first, radius, false,
                         target.second );
+    avatar &player = get_avatar();
+    // This should probably be a std::map but I had preexisting code for doing this to a vector of pairs, so I used that. Sue me.
+    std::vector<std::pair<tripoint_abs_omt, int>> places_range;
+    // Make sure the vector is never empty, that way trying to access it later won't crash us if we didn't find any valid tiles
+    places_range.emplace_back( player.global_omt_location(), 0 );
     for( const tripoint_abs_omt &place : places ) {
         overmap_buffer.reveal( place, reveal_distance );
+        places_range.emplace_back( place, rl_dist( player.global_omt_location(), place ) );
+    }
+    // Sort vector so furthest away is the first element
+    std::sort( places_range.begin(), places_range.end(), []( const auto & x, const auto & y ) {
+        return x.second > y.second;
+    } );
+    // Dummy condition, replace me with something that makes sense, like a json-read condition for whether this should happen
+    // Set destination to the furthest revealed tile
+    if( 1 == 1 ) {
+        std::vector<tripoint_abs_omt> path = overmap_buffer.get_travel_path( player.global_omt_location(),
+                                             places_range.front().first, overmap_path_params::for_player() );
+        player.omt_path.swap( path );
     }
 }
 
