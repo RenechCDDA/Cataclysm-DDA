@@ -76,6 +76,7 @@ static const construction_str_id construction_constr_veh( "constr_veh" );
 
 static const flag_id json_flag_FILTHY( "FILTHY" );
 static const flag_id json_flag_PIT( "PIT" );
+static const flag_id json_flag_UNRECOVERABLE( "UNRECOVERABLE" );
 static const furn_str_id furn_f_console( "f_console" );
 static const furn_str_id furn_f_console_broken( "f_console_broken" );
 static const furn_str_id furn_f_machinery_electronic( "f_machinery_electronic" );
@@ -1496,8 +1497,18 @@ void construct::done_deconstruct( const tripoint_bub_ms &p, Character &player_ch
         }
         add_msg( _( "The %s is disassembled." ), f.name() );
         item &item_here = here.i_at( p ).size() != 1 ? null_item_reference() : here.i_at( p ).only_item();
-        const std::vector<item *> drop = here.spawn_items( p,
-                                         item_group::items_from( f.deconstruct.drop_group, calendar::turn ) );
+        std::vector<item> deconstruct_results = item_group::items_from( f.deconstruct.drop_group,
+                                                calendar::turn );
+        // Remove items that are flagged as UNRECOVERABLE
+        for( std::vector<item>::iterator it = deconstruct_results.begin(); it != deconstruct_results.end();
+           ) {
+            if( it->has_flag( json_flag_UNRECOVERABLE ) ) {
+                it = deconstruct_results.erase( it );
+            } else {
+                ++it;
+            }
+        }
+        const std::vector<item *> drop = here.spawn_items( p, deconstruct_results );
         // if furniture has liquid in it and deconstructs into watertight containers then fill them
         if( f.has_flag( "LIQUIDCONT" ) && item_here.made_of( phase_id::LIQUID ) ) {
             for( item *it : drop ) {
@@ -1533,7 +1544,18 @@ void construct::done_deconstruct( const tripoint_bub_ms &p, Character &player_ch
         }
         here.ter_set( p, t.deconstruct.ter_set );
         add_msg( _( "The %s is disassembled." ), t.name() );
-        here.spawn_items( p, item_group::items_from( t.deconstruct.drop_group, calendar::turn ) );
+        std::vector<item> deconstruct_results = item_group::items_from( t.deconstruct.drop_group,
+                                                calendar::turn );
+        // Remove items that are flagged as UNRECOVERABLE
+        for( std::vector<item>::iterator it = deconstruct_results.begin(); it != deconstruct_results.end();
+           ) {
+            if( it->has_flag( json_flag_UNRECOVERABLE ) ) {
+                it = deconstruct_results.erase( it );
+            } else {
+                ++it;
+            }
+        }
+        here.spawn_items( p, deconstruct_results );
     }
 }
 
