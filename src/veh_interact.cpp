@@ -290,6 +290,7 @@ veh_interact::veh_interact( vehicle &veh, const point &p )
     main_context.register_action( "ANY_INPUT" );
 
     count_durability();
+    check_can_fold();
     cache_tool_availability();
     // Initialize info of selected parts
     move_cursor( point_zero );
@@ -2580,6 +2581,11 @@ void veh_interact::display_stats() const
                     wheel_state_description( *veh ) );
     i += 1;
 
+    mvwprintz( *win[i], point( 0, row[i] ), c_light_gray, _( "Foldable: " ) );
+    fold_and_print( *win[i], point( utf8_width( _( "Foldable: " ) ), row[i] ), getmaxx( *win[i] ),
+                    foldability_color, foldability );
+    i += 1;
+
     if( install_info || remove_info ) {
         // don't draw the second and third columns which would be overwritten by w_details
         return;
@@ -2996,6 +3002,20 @@ void veh_interact::count_durability()
     } else {
         total_durability_text = _( "destroyed" );
         total_durability_color = c_dark_gray;
+    }
+}
+
+void veh_interact::check_can_fold()
+{
+    const vehicle_part_range vpr = veh->get_all_parts();
+    for( vpart_reference thingie : vpr ) {
+        if( !thingie.info().folded_volume ) {
+            foldability = _( "Not foldable" );
+            foldability_color = c_red;
+            break;
+        }
+        foldability = _( "Foldable" );
+        foldability_color = c_light_green;
     }
 }
 

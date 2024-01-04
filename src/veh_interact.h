@@ -246,8 +246,12 @@ class veh_interact
 
         void count_durability();
 
+        void check_can_fold();
+
         nc_color total_durability_color;
         std::string total_durability_text;
+        nc_color foldability_color;
+        std::string foldability;
 
         /** Returns the most damaged part's index, or -1 if they're all healthy. */
         vehicle_part *get_most_damaged_part() const;
