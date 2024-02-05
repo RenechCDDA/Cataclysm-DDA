@@ -267,8 +267,13 @@ class basecamp
         inline void set_larder( std::map<std::string, int> new_larder ) {
             larder = new_larder;
         }
+        // Returns container for kcal (stored as "kcal_as_vitamin") and vitamins stored at basecamp
         inline const std::map<std::string, int> &get_larder() const {
             return larder;
+        }
+        // Returns container for kcal (stored as "kcal_as_vitamin") and vitamins stored at basecamp
+        inline const int &get_larder_kcal() const {
+            return get_larder().find( "kcal_as_vitamin" )->second;
         }
         inline const tripoint_abs_ms &get_dumping_spot() const {
             return dumping_spot;

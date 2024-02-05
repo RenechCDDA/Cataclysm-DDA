@@ -5448,14 +5448,27 @@ std::map<std::string, int> basecamp::camp_larder( std::string vit, int change )
 {
     std::map<std::string, int> resulting_larder = get_larder();
     std::map<std::string, int> vitamins_consumed;
+    faction *yours = get_player_character().get_faction();
     int camp_food = resulting_larder.find( "kcal_as_vitamin" )->second;
 
     // TODO: Check if we've moved out of lockstep with faction's food supply, throw debugmsg here if we have
 
-	// ADDITION (TODO)
+    if( change == 0 ) {
+        debugmsg( "Improper access to camp larder, use get_larder_kcal() to check stores" );
+        return vitamins_consumed;
+    }
 
+    // ADDITION
+    if( change > 0 ) {
+        resulting_larder.emplace( vit, change );
+        set_larder( resulting_larder );
+        if( vit == "kcal_as_vitamin" ) {
+            yours->food_supply += change;
+        }
+        return vitamins_consumed;
+    }
 
-	// CONSUMPTION
+    // CONSUMPTION
     if( vit != "kcal_as_vitamin" ) {
         debugmsg( "Function currently does not support consuming only individual vitamins" );
         return vitamins_consumed;
@@ -5474,7 +5487,6 @@ std::map<std::string, int> basecamp::camp_larder( std::string vit, int change )
         resulting_larder.find( vitamin_pair.first )->second -= amount_to_consume;
         vitamins_consumed.emplace( vitamin_pair.first, amount_to_consume );
     }
-    faction *yours = get_player_character().get_faction();
     // TODO: Guard access to food supply with a getter?
     yours->food_supply -= vitamins_consumed.find( "kcal_as_vitamin" )->second;
     set_larder( resulting_larder );
