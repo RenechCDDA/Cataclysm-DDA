@@ -5444,6 +5444,43 @@ int camp_food_supply_days( float exertion_level )
     return yours->food_supply / time_to_food( 24_hours, exertion_level );
 }
 
+std::map<std::string, int> basecamp::camp_larder( std::string vit, int change )
+{
+    std::map<std::string, int> resulting_larder = get_larder();
+    std::map<std::string, int> vitamins_consumed;
+    int camp_food = resulting_larder.find( "kcal_as_vitamin" )->second;
+
+    // TODO: Check if we've moved out of lockstep with faction's food supply, throw debugmsg here if we have
+
+	// ADDITION (TODO)
+
+
+	// CONSUMPTION
+    if( vit != "kcal_as_vitamin" ) {
+        debugmsg( "Function currently does not support consuming only individual vitamins" );
+        return vitamins_consumed;
+    }
+    if( camp_food == 0 ) {
+        // Prevent DBZ. Also we have nothing to eat so return early
+        return vitamins_consumed;
+    }
+    // Kcals are used as a proxy to consume vitamins.
+    // e.g. if you have a larder with 10k kcal, 100 vitamin A, 200 vitamin B then eating 1k kcal will
+    // consume 10 vitamin A and *20* vitamin B. In other words, we assume the vitamins are uniformly distributed with the kcals
+    // This isn't a perfect assumption but it's a necessary one to abstract away the food items themselves
+    double percent_consumption = std::abs( static_cast<double>( change / camp_food ) );
+    for( auto &vitamin_pair : resulting_larder ) {
+        int amount_to_consume = ( vitamin_pair.second * percent_consumption );
+        resulting_larder.find( vitamin_pair.first )->second -= amount_to_consume;
+        vitamins_consumed.emplace( vitamin_pair.first, amount_to_consume );
+    }
+    faction *yours = get_player_character().get_faction();
+    // TODO: Guard access to food supply with a getter?
+    yours->food_supply -= vitamins_consumed.find( "kcal_as_vitamin" )->second;
+    set_larder( resulting_larder );
+    return vitamins_consumed;
+}
+
 int camp_food_supply( int change )
 {
     faction *yours = get_player_character().get_faction();

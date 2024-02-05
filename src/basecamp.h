@@ -232,6 +232,10 @@ class basecamp
         void handle_reveal_mission( const point &dir );
         bool has_water() const;
 
+        /// Returns a map of kcal (as "kcal_as_vitamin") and vitamins consumed
+        std::map<std::string, int>camp_larder( std::string vit = "kcal_as_vitamin",
+                                               int change = 0 );
+
         // recipes, gathering, and craft support functions
         // from a direction
         std::map<recipe_id, translation> recipe_deck( const point &dir ) const;
@@ -260,6 +264,12 @@ class basecamp
          * if skill is higher, an item or corpse is spawned
          */
         void hunting_results( int skill, const mission_id &miss_id, int attempts, int difficulty );
+        inline void set_larder( std::map<std::string, int> new_larder ) {
+            larder = new_larder;
+        }
+        inline const std::map<std::string, int> &get_larder() const {
+            return larder;
+        }
         inline const tripoint_abs_ms &get_dumping_spot() const {
             return dumping_spot;
         }
@@ -451,6 +461,8 @@ class basecamp
         tripoint_abs_ms dumping_spot;
         // Tiles inside STORAGE-type zones that have LIQUIDCONT terrain
         std::vector<tripoint_abs_ms> liquid_dumping_spots;
+        // Container for kcal (stored as "kcal_as_vitamin") and vitamins stored at basecamp
+        std::map<std::string, int> larder;
         std::vector<const zone_data *> storage_zones; // NOLINT(cata-serialize)
         std::unordered_set<tripoint_abs_ms> src_set; // NOLINT(cata-serialize)
         std::set<itype_id> fuel_types; // NOLINT(cata-serialize)
