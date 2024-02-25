@@ -243,6 +243,9 @@ item Single_item_creator::create_single_without_container( const time_point &bir
     if( artifact ) {
         tmp.overwrite_relic( artifact->generate_relic( tmp.typeId() ) );
     }
+    if( isd != nullptr ) {
+        tmp.debug_trace.append( isd->context() );
+    }
     return tmp;
 }
 
@@ -264,6 +267,9 @@ std::size_t Single_item_creator::create( ItemList &list,
     for( ; cnt > 0; cnt-- ) {
         if( type == S_ITEM ) {
             item itm = create_single_without_container( birthday, rec );
+            if( context() != "" ) {
+                itm.debug_trace.append( context() );
+            }
             if( flags & spawn_flags::use_spawn_rate && !itm.has_flag( STATIC( flag_id( "MISSION_ITEM" ) ) ) &&
                 rng_float( 0, 1 ) > spawn_rate ) {
                 continue;

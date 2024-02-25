@@ -536,6 +536,8 @@ class item : public visitable
         void final_info( std::vector<iteminfo> &info, const iteminfo_query *parts, int batch,
                          bool debug ) const;
 
+        std::string debug_trace = "DEBUG trace:";
+
         /**
          * Calculate all burning calculations, but don't actually apply them to item.
          * DO apply them to @ref fire_data argument, though.
