@@ -302,29 +302,36 @@
   },
   {
     "type": "EXTERNAL_OPTION",
+    "name": "OVERMAPS_BEFORE_GEOGRAPHY_CHANGE",
+    "info": "Number of overmaps away from the 0,0 overmap before geography changes from the below options are active.",
+    "stype": "int",
+    "value": 10
+  },
+  {
+    "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_FOREST_INCREASE_NORTH",
-    "info": "Rate at which forest coverage of the map increases to the North, based on regional map settings thresholds.  0=no increase.",
+    "info": "Rate at which forest coverage of the map increases to the North, based on regional map settings thresholds.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "float",
     "value": 0.04
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_FOREST_INCREASE_EAST",
-    "info": "Rate at which forest coverage of the map increases to the East.  0=no increase.",
+    "info": "Rate at which forest coverage of the map increases to the East.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "float",
     "value": 0
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_FOREST_INCREASE_WEST",
-    "info": "Rate at which forest coverage of the map increases to the West.  0=no increase.",
+    "info": "Rate at which forest coverage of the map increases to the West.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "float",
     "value": 0.02
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_FOREST_INCREASE_SOUTH",
-    "info": "Rate at which forest coverage of the map increases to the South.  0=no increase.",
+    "info": "Rate at which forest coverage of the map increases to the South.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "float",
     "value": 0
   },
@@ -401,28 +408,28 @@
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_URBAN_INCREASE_NORTH",
-    "info": "Rate at which urbanity of the map increases to the North.  0=no increase.  Negative numbers are technically allowed but may cause weird effects.",
+    "info": "Rate at which urbanity of the map increases to the North.  0=no increase.  Negative numbers are technically allowed but may cause weird effects. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "int",
     "value": 0
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_URBAN_INCREASE_EAST",
-    "info": "Rate at which urbanity of the map increases to the East.  0=no increase.",
+    "info": "Rate at which urbanity of the map increases to the East.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "int",
     "value": 10
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_URBAN_INCREASE_WEST",
-    "info": "Rate at which urbanity of the map increases to the South.  0=no increase.",
+    "info": "Rate at which urbanity of the map increases to the South.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "int",
     "value": 0
   },
   {
     "type": "EXTERNAL_OPTION",
     "name": "OVERMAP_URBAN_INCREASE_SOUTH",
-    "info": "Rate at which urbanity of the map increases to the West.  0=no increase.",
+    "info": "Rate at which urbanity of the map increases to the West.  0=no increase. Scaling begins only after reaching OVERMAPS_BEFORE_GEOGRAPHY_CHANGE.",
     "stype": "int",
     "value": 5
   },
