@@ -7600,9 +7600,16 @@ item &item::set_flag( const flag_id &flag )
     return *this;
 }
 
+bool item::allows_fault( const fault_id &fault_id ) const
+{
+    return true;
+}
+
 item &item::set_fault( const fault_id &fault_id )
 {
-    faults.insert( fault_id );
+    if( this->allows_fault( fault_id ) ) {
+        faults.insert( fault_id );
+    }
     return *this;
 }
 

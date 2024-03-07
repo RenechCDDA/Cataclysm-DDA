@@ -1989,6 +1989,8 @@ class item : public visitable
         /** Does this item part have a fault with this flag */
         bool has_fault_flag( const std::string &searched_flag ) const;
 
+        bool allows_fault( const fault_id &fault ) const;
+
         /**
          * @name Item properties
          *
