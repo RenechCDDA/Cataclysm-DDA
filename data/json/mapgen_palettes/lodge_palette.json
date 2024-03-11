@@ -75,14 +75,14 @@
       "O": { "item": "livingroom", "chance": 20 },
       "&": { "item": "trash", "chance": 20 },
       "R": [
-        { "item": "camping", "chance": 50 },
-        { "item": "gear_survival", "chance": 30 },
-        { "item": "cannedfood", "chance": 50 },
-        { "item": "stash_food", "chance": 50 }
+        { "item": "camping" },
+        { "item": "gear_survival" },
+        { "item": "cannedfood" },
+        { "item": "stash_food" }
       ],
       "s": { "item": "SUS_bathroom_sink", "chance": 60 },
       "t": { "item": "dining", "chance": 30, "repeat": [ 1, 2 ] },
-      "U": { "item": "camping", "chance": 30, "repeat": [ 1, 4 ] },
+      "U": { "item": "camping", "repeat": [ 1, 4 ] },
       "u": [ { "item": "SUS_breakfast_cupboard", "chance": 30 }, { "item": "SUS_coffee_cupboard", "chance": 50 } ],
       "V": { "item": "SUS_oven", "chance": 70 },
       "Y": { "item": "coat_rack", "chance": 35, "repeat": [ 1, 4 ] },
@@ -153,20 +153,20 @@
       "R": "t_floor"
     },
     "items": {
-      "a": { "item": "clothing_hunting", "chance": 20, "repeat": [ 1, 6 ] },
-      "A": { "item": "tools_hunting", "chance": 60, "repeat": [ 1, 8 ] },
-      "B": { "item": "tools_hunting", "chance": 60 },
+      "a": { "item": "clothing_hunting", "repeat": [ 1, 6 ] },
+      "A": { "item": "tools_hunting", "repeat": [ 1, 8 ] },
+      "B": { "item": "tools_hunting" },
       "D": { "item": "hunting_lodge_weapons" },
-      "F": { "item": "archery_ammo", "chance": 30, "repeat": [ 1, 4 ] },
+      "F": { "item": "archery_ammo", "repeat": [ 1, 4 ] },
       "h": { "item": "cannibal_weapons", "repeat": [ 1, 4 ] },
       "L": { "item": "cannibal_food", "repeat": [ 1, 4 ] },
-      "S": { "item": "stash_wood", "chance": 60, "repeat": [ 2, 4 ] },
-      "&": { "item": "trash", "chance": 20 },
+      "S": { "item": "stash_wood", "repeat": [ 2, 4 ] },
+      "&": { "item": "trash" },
       "R": [
-        { "item": "camping", "chance": 50 },
-        { "item": "gear_survival", "chance": 30 },
-        { "item": "cannedfood", "chance": 50, "repeat": [ 3, 8 ] },
-        { "item": "stash_food", "chance": 50, "repeat": [ 3, 8 ] }
+        { "item": "camping" },
+        { "item": "gear_survival" },
+        { "item": "cannedfood", "repeat": [ 3, 8 ] },
+        { "item": "stash_food", "repeat": [ 3, 8 ] }
       ]
     }
   },

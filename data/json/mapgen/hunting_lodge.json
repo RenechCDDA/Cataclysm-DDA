@@ -37,7 +37,7 @@
       "place_zones": [ { "type": "ZONE_START_POINT", "faction": "your_followers", "x": [ 16, 17 ], "y": [ 2, 3 ] } ],
       "place_nested": [
         {
-          "chunks": [ [ "lodge_pantry_15x15", 80 ], [ "lodge_cannibal_15x15", 20 ], [ "lodge_hunting_15x15", 50 ] ],
+          "chunks": [ [ "lodge_pantry_15x15", 1 ], [ "lodge_cannibal_15x15", 20000 ], [ "lodge_hunting_15x15", 1 ] ],
           "x": 8,
           "y": 9
         }
@@ -82,7 +82,7 @@
       "place_npcs": [ { "class": "ABENAKI_Glooscap", "x": 28, "y": 11 } ],
       "place_nested": [
         {
-          "chunks": [ [ "lodge_pantry_15x15", 80 ], [ "lodge_cannibal_15x15", 20 ], [ "lodge_hunting_15x15", 50 ] ],
+          "chunks": [ [ "lodge_pantry_15x15", 80 ], [ "lodge_cannibal_15x15", 20000 ], [ "lodge_hunting_15x15", 50 ] ],
           "x": 8,
           "y": 9
         }
