@@ -2170,6 +2170,7 @@ class vehicle
         // Intended to be a misc list, but currently only security systems.
         std::vector<int> speciality; // NOLINT(cata-serialize)
         std::vector<int> floating; // NOLINT(cata-serialize)
+        std::vector<int> kinda_floating; // NOLINT(cata-serialize)
         std::vector<int> batteries; // NOLINT(cata-serialize)
         std::vector<int> fuel_containers; // NOLINT(cata-serialize)
         std::vector<int> turret_locations; // NOLINT(cata-serialize)

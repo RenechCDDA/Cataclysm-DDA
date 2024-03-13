@@ -4433,6 +4433,27 @@ double vehicle::coeff_water_drag() const
     }
     double hull_coverage = static_cast<double>( floating.size() ) / structural_part_count;
 
+    double empty_fuel_tank_coverage = 0.0;
+
+    for( auto p : kinda_floating ) {
+        const vehicle_part &vp = parts[p];
+        // Get the tank's volume as a fraction of an 'ideal' boat part (smaller tanks count for less)
+        // double fraction = foo();
+        // Amount of actual air, this is rated at 100%
+        double free_space = static_cast<double>( 1.0 - ( vp.ammo_remaining() / vp.ammo_capacity(
+                                vp.ammo_current()->ammo->type ) ) );
+        // Get the density of the current ammo type
+        // units::mass density = foo();
+        // Compare density to air, pro-rate the non-air space accordingly
+        // double buoyancy = ( density * ( 1 - free_space ) ) + ( free_space * air_density );
+        // Finally once we have our idealized buoyancy calculation...
+        // empty_fuel_tank_coverage += buoyancy;
+    }
+
+    // ...and then also account for how many fuel tanks there are relative to the whole structure
+    empty_fuel_tank_coverage = empty_fuel_tank_coverage / structural_part_count;
+
+
     int tile_width = mount_max.y - mount_min.y + 1;
     double width_m = tile_to_width( tile_width );
 
@@ -6173,6 +6194,10 @@ void vehicle::refresh( const bool remove_fakes )
         if( vpi.has_flag( VPFLAG_FLOATS ) && ( vpi.has_flag( VPFLAG_NO_LEAK ) ||
                                                !( vp.part().health_percent() < vp.part().floating_leak_threshold() ) ) ) {
             floating.push_back( p );
+        }
+
+        if( vp.part().is_tank() ) {
+            kinda_floating.push_back( p );
         }
 
         if( vp.part().is_unavailable() ) {
