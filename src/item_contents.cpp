@@ -36,6 +36,8 @@
 #include "units.h"
 
 static const flag_id json_flag_CASING( "CASING" );
+static const flag_id json_flag_NO_RELOAD( "NO_RELOAD" );
+static const flag_id json_flag_NO_UNLOAD( "NO_UNLOAD" );
 
 class pocket_favorite_callback : public uilist_callback
 {
@@ -256,6 +258,7 @@ bool pocket_favorite_callback::key( const input_context &ctxt, const input_event
     item_pocket *selected_pocket = nullptr;
     int i = 0;
     int pocket_num = 0;
+    item *selected_item = nullptr;
     for( std::tuple<item_pocket *, int, uilist_entry *> &pocket_val : saved_pockets ) {
         item_pocket *pocket = std::get<0>( pocket_val );
         if( pocket == nullptr || ( pocket->get_pocket_data()  &&
@@ -265,6 +268,7 @@ bool pocket_favorite_callback::key( const input_context &ctxt, const input_event
         }
 
         if( i == menu->selected ) {
+            selected_item = this->to_organize.at( std::get<2>( pocket_val )->retval );
             selected_pocket = pocket;
             pocket_num = std::get<1>( pocket_val ) + 1;
             break;
@@ -303,6 +307,10 @@ bool pocket_favorite_callback::key( const input_context &ctxt, const input_event
         selected_pocket->settings.set_was_edited();
         return true;
     } else if( action == "FAV_MOVE_ITEM" ) {
+		if (selected_item->has_flag( json_flag_NO_UNLOAD ) || selected_item->has_flag( json_flag_NO_RELOAD ) ){
+			debugmsg("Fucky wucky");
+			return false;
+		}
         move_item( menu, selected_pocket );
         selected_pocket->settings.set_was_edited();
         return true;
