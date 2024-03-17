@@ -268,7 +268,14 @@ bool pocket_favorite_callback::key( const input_context &ctxt, const input_event
         }
 
         if( i == menu->selected ) {
-            selected_item = this->to_organize.at( std::get<2>( pocket_val )->retval );
+            for( item *this_item : this->to_organize ) {
+                auto all_pockets = this_item->get_all_contained_pockets();
+                for( auto this_pocket : all_pockets ) {
+                    if( this_pocket->get_pocket_data()->name == pocket->get_pocket_data()->name ) {
+                        selected_item = this_item;
+                    }
+                }
+            }
             selected_pocket = pocket;
             pocket_num = std::get<1>( pocket_val ) + 1;
             break;
@@ -307,10 +314,11 @@ bool pocket_favorite_callback::key( const input_context &ctxt, const input_event
         selected_pocket->settings.set_was_edited();
         return true;
     } else if( action == "FAV_MOVE_ITEM" ) {
-		if (selected_item->has_flag( json_flag_NO_UNLOAD ) || selected_item->has_flag( json_flag_NO_RELOAD ) ){
-			debugmsg("Fucky wucky");
-			return false;
-		}
+        if( selected_item->has_flag( json_flag_NO_UNLOAD ) ||
+            selected_item->has_flag( json_flag_NO_RELOAD ) ) {
+            debugmsg( "Then we prevent moving the item" );
+            return false;
+        }
         move_item( menu, selected_pocket );
         selected_pocket->settings.set_was_edited();
         return true;
