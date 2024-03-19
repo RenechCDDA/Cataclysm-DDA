@@ -264,6 +264,7 @@
     "entries": [ { "drop": "gastropod_sample_huge", "type": "mutagen_group" } ]
   },
   {
+    "//": "Note: hardcoded reference in Character::place_corpse (both overloads). If you change this ID for what the normal feral human gives, you'll need to change it there too.",
     "id": "dissect_human_sample_single",
     "type": "harvest",
     "message": "With cuts and pulls equally similar to both extraction and vandalism, you scrape together the most important parts of the creature.",

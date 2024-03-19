@@ -49,6 +49,7 @@
 #include "game_constants.h"
 #include "gun_mode.h"
 #include "handle_liquid.h"
+#include "harvest.h"
 #include "input_context.h"
 #include "inventory.h"
 #include "item_location.h"
@@ -269,6 +270,8 @@ static const fault_id fault_bionic_salvaged( "fault_bionic_salvaged" );
 static const field_type_str_id field_fd_clairvoyant( "fd_clairvoyant" );
 
 static const furn_str_id furn_f_null( "f_null" );
+
+static const harvest_id harvest_dissect_human_sample_single( "dissect_human_sample_single" );
 
 static const itype_id fuel_type_animal( "animal" );
 static const itype_id fuel_type_muscle( "muscle" );
@@ -10472,6 +10475,18 @@ void Character::place_corpse()
     map &here = get_map();
     for( item *itm : tmp ) {
         body.force_insert_item( *itm, pocket_type::CONTAINER );
+    }
+    // Wildly unncessary code to say "Put a human sample in there too", but just in case the json group changes in the future.
+    for( const harvest_entry &entry : harvest_dissect_human_sample_single->entries() ) {
+        if( entry.type->is_itype() ) {
+            body.put_in( item( entry.drop ), pocket_type::CORPSE );
+        } else {
+			// This doesn't recurse through sub-groups, or at least not mutagen_groups which harvest uses! Why is harvest so difficult aaaaaaaaaaaa
+            auto item_list = item_group::items_from( item_group_id( entry.type.str() ) );
+            for( item &new_it : item_list ) {
+                body.put_in( new_it, pocket_type::CORPSE );
+            }
+        }
     }
     for( const bionic &bio : *my_bionics ) {
         if( item::type_is_defined( bio.info().itype() ) ) {
