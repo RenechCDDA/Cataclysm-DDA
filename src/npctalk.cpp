@@ -183,7 +183,9 @@ struct item_search_data {
         id = itype_id( jo.get_string( "id", "" ) );
         category = item_category_id( jo.get_string( "category", "" ) );
         material = material_id( jo.get_string( "material", "" ) );
-        calories = jo.get_int( "calories" );
+        if( jo.has_int( "calories" ) ) {
+            calories = jo.get_int( "calories" );
+        }
         for( std::string flag : jo.get_string_array( "flags" ) ) {
             flags.emplace_back( flag );
         }
