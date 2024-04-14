@@ -85,7 +85,6 @@ static const flag_id json_flag_ALLERGEN_CHEESE( "ALLERGEN_CHEESE" );
 static const flag_id json_flag_ALLERGEN_DRIED_VEGETABLE( "ALLERGEN_DRIED_VEGETABLE" );
 static const flag_id json_flag_ALLERGEN_EGG( "ALLERGEN_EGG" );
 static const flag_id json_flag_ALLERGEN_FRUIT( "ALLERGEN_FRUIT" );
-static const flag_id json_flag_ALLERGEN_MEAT( "ALLERGEN_MEAT" );
 static const flag_id json_flag_ALLERGEN_MILK( "ALLERGEN_MILK" );
 static const flag_id json_flag_ALLERGEN_NUT( "ALLERGEN_NUT" );
 static const flag_id json_flag_ALLERGEN_VEGGY( "ALLERGEN_VEGGY" );
@@ -163,6 +162,7 @@ static const trait_id trait_VEGAN( "VEGAN" );
 static const trait_id trait_VEGETARIAN( "VEGETARIAN" );
 static const trait_id trait_WATERSLEEP( "WATERSLEEP" );
 
+static const vitamin_id vitamin_egg_allergen( "egg_allergen" );
 static const vitamin_id vitamin_fruit_allergen( "fruit_allergen" );
 static const vitamin_id vitamin_human_flesh_vitamin( "human_flesh_vitamin" );
 static const vitamin_id vitamin_junk_allergen( "junk_allergen" );
@@ -179,8 +179,8 @@ static const std::array<flag_id, 6> carnivore_blacklist {{
         json_flag_ALLERGEN_BREAD, json_flag_ALLERGEN_DRIED_VEGETABLE
     }};
 
-static const std::array<flag_id, 2> herbivore_blacklist {{
-        json_flag_ALLERGEN_MEAT, json_flag_ALLERGEN_EGG
+static const std::array<vitamin_id, 2> herbivore_blacklist {{
+        vitamin_meat_allergen, vitamin_egg_allergen
     }};
 
 // TODO: Move pizza scraping here.
@@ -877,9 +877,9 @@ ret_val<edible_rating> Character::can_eat( const item &food ) const
         return ret_val<edible_rating>::make_failure( INEDIBLE_MUTATION,
                 _( "The thought of eating that makes you feel sick." ) );
     }
-    const std::array<flag_id, 6> vegan_blacklist {{
-            json_flag_ALLERGEN_MEAT, json_flag_ALLERGEN_EGG,
-            json_flag_ALLERGEN_MILK, json_flag_ANIMAL_PRODUCT,
+    const std::array<vitamin_id, 6> vegan_blacklist {{
+            vitamin_meat_allergen, vitamin_egg_allergen,
+            vitamin_milk_allergen, json_flag_ANIMAL_PRODUCT,
             json_flag_ALLERGEN_CHEESE, flag_URSINE_HONEY
         }};
     if( has_trait( trait_VEGAN ) &&

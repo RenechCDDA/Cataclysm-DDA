@@ -574,5 +574,14 @@
     "min": 0,
     "max": 10000,
     "rate": "1 h"
+  },
+  {
+    "id": "egg_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Egg allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
   }
 ]
