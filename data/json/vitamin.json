@@ -520,5 +520,59 @@
     "min": 0,
     "max": 10000,
     "rate": "1 h"
+  },
+  {
+    "id": "meat_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Meat allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
+  },
+  {
+    "id": "veggy_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Veggy allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
+  },
+  {
+    "id": "milk_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Dairy allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
+  },
+  {
+    "id": "fruit_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Fruit allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
+  },
+  {
+    "id": "junk_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Junkfood allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
+  },
+  {
+    "id": "wheat_allergen",
+    "type": "vitamin",
+    "vit_type": "counter",
+    "name": { "str": "Wheat allergen" },
+    "min": 0,
+    "max": 10000,
+    "rate": "1 h"
   }
 ]

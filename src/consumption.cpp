@@ -163,7 +163,13 @@ static const trait_id trait_VEGAN( "VEGAN" );
 static const trait_id trait_VEGETARIAN( "VEGETARIAN" );
 static const trait_id trait_WATERSLEEP( "WATERSLEEP" );
 
+static const vitamin_id vitamin_fruit_allergen( "fruit_allergen" );
 static const vitamin_id vitamin_human_flesh_vitamin( "human_flesh_vitamin" );
+static const vitamin_id vitamin_junk_allergen( "junk_allergen" );
+static const vitamin_id vitamin_meat_allergen( "meat_allergen" );
+static const vitamin_id vitamin_milk_allergen( "milk_allergen" );
+static const vitamin_id vitamin_veggy_allergen( "veggy_allergen" );
+static const vitamin_id vitamin_wheat_allergen( "wheat_allergen" );
 
 // note: cannot use constants from flag.h (e.g. flag_ALLERGEN_VEGGY) here, as they
 // might be uninitialized at the time these const arrays are created
@@ -729,20 +735,20 @@ float Character::metabolic_rate() const
 
 morale_type Character::allergy_type( const item &food ) const
 {
-    using allergy_tuple = std::tuple<trait_id, flag_id, morale_type>;
+    using allergy_tuple = std::tuple<trait_id, vitamin_id, morale_type>;
     static const std::array<allergy_tuple, 8> allergy_tuples = {{
-            std::make_tuple( trait_VEGETARIAN, flag_ALLERGEN_MEAT, MORALE_ANTIMEAT ),
-            std::make_tuple( trait_MEATARIAN, flag_ALLERGEN_VEGGY, MORALE_ANTIVEGGY ),
-            std::make_tuple( trait_LACTOSE, flag_ALLERGEN_MILK, MORALE_LACTOSE ),
-            std::make_tuple( trait_ANTIFRUIT, flag_ALLERGEN_FRUIT, MORALE_ANTIFRUIT ),
-            std::make_tuple( trait_ANTIJUNK, flag_ALLERGEN_JUNK, MORALE_ANTIJUNK ),
-            std::make_tuple( trait_ANTIWHEAT, flag_ALLERGEN_WHEAT, MORALE_ANTIWHEAT )
+            std::make_tuple( trait_VEGETARIAN, vitamin_meat_allergen, MORALE_ANTIMEAT ),
+            std::make_tuple( trait_MEATARIAN, vitamin_veggy_allergen, MORALE_ANTIVEGGY ),
+            std::make_tuple( trait_LACTOSE, vitamin_milk_allergen, MORALE_LACTOSE ),
+            std::make_tuple( trait_ANTIFRUIT, vitamin_fruit_allergen, MORALE_ANTIFRUIT ),
+            std::make_tuple( trait_ANTIJUNK, vitamin_junk_allergen, MORALE_ANTIJUNK ),
+            std::make_tuple( trait_ANTIWHEAT, vitamin_wheat_allergen, MORALE_ANTIWHEAT )
         }
     };
 
     for( const auto &tp : allergy_tuples ) {
         if( has_trait( std::get<0>( tp ) ) &&
-            food.has_flag( std::get<1>( tp ) ) ) {
+            food.has_vitamin( std::get<1>( tp ) ) ) {
             return std::get<2>( tp );
         }
     }
