@@ -1,0 +1,7 @@
+[
+  {
+    "type": "camp_migration",
+    "id": "lmao",
+    "camp_migrations": { "name": "Evac Centre", "overmap_terrain": "evac_center_13", "faction": "free_merchants" }
+  }
+]
