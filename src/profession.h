@@ -125,10 +125,10 @@ class profession
         std::vector<matype_id> ma_known() const;
         std::vector<matype_id> ma_choices() const;
         bool allows_hobby( const string_id<profession> &hobby )const;
-        int ma_choice_amount;
+        int ma_choice_amount = 1;
         StartingSkillList skills() const;
         const std::vector<mission_type_id> &missions() const;
-        int age_lower = 21;
+        int age_lower = 16;
         int age_upper = 55;
 
         std::vector<std::pair<string_id<profession>, mod_id>> src;

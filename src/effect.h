@@ -83,9 +83,9 @@ struct limb_score_effect {
     // Score id to affect
     limb_score_id score_id;
     // Multiplier to apply when not resisted
-    float mod;
+    float mod = 1.0f;
     float red_mod;
-    float scaling;
+    float scaling = 0.0f;
     float red_scaling;
 
     void load( const JsonObject &jo );

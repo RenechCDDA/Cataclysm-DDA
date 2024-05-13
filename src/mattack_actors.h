@@ -74,9 +74,9 @@ class mon_spellcasting_actor : public mattack_actor
 
 struct grab {
     // Intensity of grab effect applied, defaults to the monster's defined grab_strength unless specified
-    int grab_strength;
+    int grab_strength = -1;
     // Percent chance to initiate a pull
-    int pull_chance;
+    int pull_chance = -1;
     // Ratio of pullee:puller weight
     float pull_weight_ratio;
     // Which effect should we apply on a successful grab to our target (bp)
@@ -93,7 +93,7 @@ struct grab {
     // Number of drag steps which give you a grab break attempt
     int drag_grab_break_distance;
     // Movecost modifier for drag-related movements
-    float drag_movecost_mod;
+    float drag_movecost_mod = 1.0f;
     // Messages for pulls and drags, those are mutually exclusive
     translation pull_msg_u;
     translation pull_fail_msg_u;
@@ -214,10 +214,10 @@ class gun_actor : public mattack_actor
         /*@{*/
         /** Balanced against player. If fake_skills unspecified defaults to GUN 4, WEAPON 8 */
         std::map<skill_id, int> fake_skills;
-        int fake_str = 16;
+        int fake_str = 8;
         int fake_dex = 8;
         int fake_int = 8;
-        int fake_per = 12;
+        int fake_per = 8;
         /*@}*/
 
         /** Specify weapon mode to use at different engagement distances */

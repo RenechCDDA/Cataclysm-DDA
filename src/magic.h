@@ -224,7 +224,7 @@ class spell_type
         std::string sound_variant;
         // spell effect string. used to look up spell function
         std::string effect_name;
-        bool teachable;
+        bool teachable = true;
         // NOLINTNEXTLINE(cata-serialize)
         std::function<void( const spell &, Creature &, const tripoint & )> effect;
         std::function<std::set<tripoint>( const spell_effect::override_parameters &params,

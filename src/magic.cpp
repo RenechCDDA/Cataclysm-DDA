@@ -2991,7 +2991,7 @@ void fake_spell::load( const JsonObject &jo )
     optional( jo, false, "once_in", trigger_once_in, trigger_once_in_default );
     optional( jo, false, "message", trigger_message );
     optional( jo, false, "npc_message", npc_trigger_message );
-    int max_level_int;
+    int max_level_int = -1;
     optional( jo, false, "max_level", max_level_int, -1 );
     if( max_level_int == -1 ) {
         max_level = std::nullopt;
