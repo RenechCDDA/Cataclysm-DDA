@@ -161,6 +161,7 @@ struct trap {
         // For disassembly?
         std::vector<std::tuple<itype_id, int, int>> components;
     public:
+        std::optional<itype_id> trap_item_type;
         // data required for trapfunc::spell()
         fake_spell spell_data;
         int comfort = 0;
@@ -229,6 +230,8 @@ struct trap {
         bool easy_take_down() const;
 
         bool is_trivial_to_spot() const;
+
+        void set_trap_data( itype_id trap_item_type_id );
 
         /**
          * Some traps are part of the terrain (e.g. pits) and can therefore not be disarmed
