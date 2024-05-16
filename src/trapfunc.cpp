@@ -58,6 +58,7 @@ static const efftype_id effect_ridden( "ridden" );
 static const efftype_id effect_slimed( "slimed" );
 static const efftype_id effect_slow_descent( "slow_descent" );
 static const efftype_id effect_strengthened_gravity( "strengthened_gravity" );
+static const efftype_id effect_stunned( "stunned" );
 static const efftype_id effect_tetanus( "tetanus" );
 static const efftype_id effect_weakened_gravity( "weakened_gravity" );
 
@@ -679,6 +680,45 @@ bool trapfunc::snare_heavy( const tripoint &p, Creature *c, item * )
         z->deal_damage( nullptr, hit, damage_instance( damage_bash, damage ) );
     }
     c->check_dead_state();
+    return true;
+}
+
+bool trapfunc::snare_species( const tripoint &p, Creature *critter, item *trap_item )
+{
+    map &here = get_map();
+    if( !critter ) { // Nothing to capture
+        here.remove_trap( p ); // Remove trap anyway, must've been hit by a vehicle or something
+        return false;
+    }
+
+    std::string species_to_capture = trap_item->get_property_string( "capture_species" );
+    species_id spec = species_id( species_to_capture );
+
+    if( !critter->in_species( spec ) ) {
+        return false;
+    }
+
+    {
+        sounds::sound( p, 8, sounds::sound_t::combat, _( "SNAP!" ), false, "trap", "bear_trap" );
+    }
+
+    here.remove_trap( p );
+    if( critter ) {
+        // What got hit?
+        const bodypart_id hit = critter->get_random_body_part_of_type( body_part_type::type::leg );
+
+        // Messages
+        critter->add_msg_player_or_npc( m_bad, _( "A bear trap closes on your foot!" ),
+                                        _( "A bear trap closes on <npcname>'s foot!" ) );
+        if( critter->has_effect( effect_ridden ) ) {
+            add_msg( m_warning, _( "Your %s is caught by a beartrap!" ), critter->get_name() );
+        }
+        // Actual effects
+        critter->add_effect( effect_stunned, 10_turns, hit, true );
+
+        critter->check_dead_state();
+    }
+
     return true;
 }
 
@@ -1669,6 +1709,7 @@ const trap_function &trap_function_from_string( const std::string &function_name
             { "blade", trapfunc::blade },
             { "snare_light", trapfunc::snare_light },
             { "snare_heavy", trapfunc::snare_heavy },
+            { "snare_species", trapfunc::snare_species },
             { "landmine", trapfunc::landmine },
             { "telepad", trapfunc::telepad },
             { "goo", trapfunc::goo },

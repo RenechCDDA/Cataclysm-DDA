@@ -37,6 +37,7 @@ bool cot( const tripoint &p, Creature *c, item *i );
 bool beartrap( const tripoint &p, Creature *c, item *i );
 bool snare_light( const tripoint &p, Creature *c, item *i );
 bool snare_heavy( const tripoint &p, Creature *c, item *i );
+bool snare_species( const tripoint &p, Creature *critter, item *trap_item );
 bool board( const tripoint &p, Creature *c, item *i );
 bool caltrops( const tripoint &p, Creature *c, item *i );
 bool caltrops_glass( const tripoint &p, Creature *c, item *i );

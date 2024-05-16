@@ -50,6 +50,30 @@
     }
   },
   {
+    "id": "species_snare_kit",
+    "type": "TOOL",
+    "name": "species snare kit",
+    "category": "traps",
+    "properties": { "capture_species": "ROBOT" },
+    "description": "DUMMY VALUES BELOW",
+    "weight": "2500 g",
+    "volume": "3150 ml",
+    "longest_side": "80 cm",
+    "price": "15 USD",
+    "price_postapoc": "5 USD",
+    "material": "wood",
+    "symbol": ";",
+    "color": "brown",
+    "flags": [ "SINGLE_USE" ],
+    "use_action": {
+      "type": "place_trap",
+      "trap": "tr_species_snare",
+      "moves": 150,
+      "practice": 2,
+      "done_message": "You set the snare trap."
+    }
+  },
+  {
     "id": "blade_trap",
     "type": "TOOL",
     "name": { "str": "blade trap" },
