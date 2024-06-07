@@ -206,7 +206,7 @@ TEST_CASE( "faucet_offers_cold_water", "[vehicle][vehicle_parts]" )
     set_time( midday );
 
     const tripoint test_origin( 60, 60, 0 );
-    const int water_charges = 8;
+    const int water_charges = 5;
     Character &character = get_player_character();
     const item backpack( "backpack" );
     character.wear_item( backpack );
