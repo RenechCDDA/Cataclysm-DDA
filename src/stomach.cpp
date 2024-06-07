@@ -313,28 +313,18 @@ units::volume stomach_contents::stomach_remaining( const Character &owner ) cons
     return capacity( owner ) - contents - water;
 }
 
-bool stomach_contents::would_be_engorged_with( const Character &owner, units::volume intake,
+trinary stomach_contents::future_stomach_fullness( const Character &owner, units::volume intake,
         bool calorie_deficit ) const
 {
-    const double fullness_ratio = ( contains() + intake ) / capacity( owner );
-    if( calorie_deficit && fullness_ratio >= 1.0 ) {
-        return true;
-    } else if( fullness_ratio >= 5.0 / 6.0 ) {
-        return true;
+    const double future_contents = to_milliliter( contains() + intake );
+    const double future_fullness_ratio = future_contents / to_milliliter( capacity( owner ) );
+    if( future_fullness_ratio >= ( calorie_deficit ? 1.0 : 5.0 / 6.0 ) ) {  // thresholds for engorged
+        return trinary::ALL;    // will be engorged
+    } else if( future_fullness_ratio >= ( calorie_deficit ? 0.75 : 0.55 ) ) {   // thresholds for full
+        return trinary::SOME;   // will become full
+    } else {
+        return trinary::NONE;   // won't become full
     }
-    return false;
-}
-
-bool stomach_contents::would_be_full_with( const Character &owner, units::volume intake,
-        bool calorie_deficit ) const
-{
-    const double fullness_ratio = ( contains() + intake ) / capacity( owner );
-    if( calorie_deficit && fullness_ratio >= 11.0 / 20.0 ) {
-        return true;
-    } else if( fullness_ratio >= 3.0 / 4.0 ) {
-        return true;
-    }
-    return false;
 }
 
 units::volume stomach_contents::contains() const

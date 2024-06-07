@@ -165,9 +165,13 @@ class stomach_contents
          */
         units::volume capacity( const Character &owner ) const;
         // These functions need a ref to the stomach's owner because capacity() does
-        bool would_be_engorged_with( const Character &owner, units::volume intake,
-                                     bool calorie_deficit ) const;
-        bool would_be_full_with( const Character &owner, units::volume intake, bool calorie_deficit ) const;
+        // this function checks if consuming an item would make you overeat (with emetic consequences)
+        // trinary::ALL means the player will become engorged
+        // trinary::SOME for just full
+        // trinary::NONE for everything else
+        trinary future_stomach_fullness( const Character &owner, units::volume intake,
+                                         bool calorie_deficit ) const;
+
         // how much stomach capacity you have left before you puke from stuffing your gob
         units::volume stomach_remaining( const Character &owner ) const;
         // how much volume is in the stomach_contents

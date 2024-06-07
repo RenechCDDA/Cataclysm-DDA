@@ -1051,6 +1051,8 @@ void Character::update_stomach( const time_point &from, const time_point &to )
     const bool calorie_deficit = has_calorie_deficit();
     const units::volume contains = stomach.contains();
     const units::volume cap = stomach.capacity( *this );
+    const trinary current_stomach_fullness = stomach.future_stomach_fullness( *this, 0_ml,
+            calorie_deficit );
 
     efftype_id hunger_effect;
     // i ate just now!
@@ -1065,9 +1067,9 @@ void Character::update_stomach( const time_point &from, const time_point &to )
         // > 3/4 cap    full        full        full
         // > 1/2 cap    satisfied   v. hungry   famished/(near)starving
         // <= 1/2 cap   hungry      v. hungry   famished/(near)starving
-        if( stomach.would_be_engorged_with( *this, 0_ml, calorie_deficit ) ) {
+        if( current_stomach_fullness == trinary::ALL ) {            // we are engorged
             hunger_effect = effect_hunger_engorged;
-        } else if( stomach.would_be_full_with( *this, 0_ml, calorie_deficit ) ) {
+        } else if( current_stomach_fullness == trinary::SOME ) {    // we are just full
             hunger_effect = effect_hunger_full;
         } else if( just_ate && contains > cap / 2 ) {
             hunger_effect = effect_hunger_satisfied;
@@ -1090,9 +1092,9 @@ void Character::update_stomach( const time_point &from, const time_point &to )
         // >= 3/8 cap   satisfied   satisfied   blank
         // > 0          blank       blank       blank
         // 0            blank       blank       (v.) hungry
-        if( stomach.would_be_engorged_with( *this, 0_ml, calorie_deficit ) ) {
+        if( current_stomach_fullness == trinary::ALL ) {            // we are engorged
             hunger_effect = effect_hunger_engorged;
-        } else if( stomach.would_be_full_with( *this, 0_ml, calorie_deficit ) ) {
+        } else if( current_stomach_fullness == trinary::SOME ) {    // we are just full
             hunger_effect = effect_hunger_full;
         } else if( recently_ate && contains >= cap * 3 / 8 ) {
             hunger_effect = effect_hunger_satisfied;

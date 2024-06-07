@@ -992,15 +992,23 @@ ret_val<edible_rating> Character::will_eat( const item &food, bool interactive )
         add_consequence( _( "Your stomach won't be happy (not rotten enough)." ), ALLERGY_WEAK );
     }
 
-    units::volume in_stomach_volume =
-        food.volume( false, false, 1 ) * compute_effective_food_volume_ratio( food );
-    if( food.is_food() &&
-        ( stomach.would_be_engorged_with( *this, in_stomach_volume, has_calorie_deficit() ) ||
-          has_effect( effect_hunger_full ) || has_effect( effect_hunger_engorged ) ) ) {
-        if( edible ) {
-            add_consequence( _( "You're full already and will be forcing yourself to eat." ), TOO_FULL );
-        } else {
-            add_consequence( _( "You're full already and will be forcing yourself to drink." ), TOO_FULL );
+    // acquiring the volume of a single charge of food, multiplying with essentially a clamp for energy density
+    units::volume potential_food_volume = food.volume( false, false,
+                                          1 ) * compute_effective_food_volume_ratio( food );
+    if( food.is_food() ) {
+        if( ( stomach.future_stomach_fullness( *this, 0_ml,
+                                               has_calorie_deficit() ) != trinary::NONE ) ) {  // currently either engorged or full
+            if( edible ) {
+                add_consequence( _( "You're full already and will be forcing yourself to eat." ), TOO_FULL );
+            } else {
+                add_consequence( _( "You're full already and will be forcing yourself to drink." ), TOO_FULL );
+            }
+        } else if( stomach.future_stomach_fullness( *this, potential_food_volume,
+                   has_calorie_deficit() ) ==
+                   trinary::ALL ) {  // warns that consumption will result in becoming engorged
+            add_consequence(
+                _( "You would not be able to consume any of this without becoming way too full for your liking." ),
+                TOO_FULL ); // not currently full, but the food would jump you to engorged
         }
     }
 
