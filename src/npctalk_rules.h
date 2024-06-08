@@ -40,6 +40,8 @@ class follower_rules_ui_impl : public cataimgui::window
 
         void set_npc_pointer_to( npc *new_guy );
 
+        void copy_rules_popup( bool exporting_rules );
+
     private:
         npc *guy = nullptr;
         std::string get_parsed( std::string initial_string );
