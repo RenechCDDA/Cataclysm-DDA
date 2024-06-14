@@ -9767,6 +9767,7 @@ void game::butcher()
     item *salvage_tool = nullptr;
     const salvage_actor *salvage_iuse = nullptr;
     if( !salvage_tools.empty() ) {
+        // All this would be removed
         salvage_tool = salvage_tools.front();
         salvage_tool_index = u.get_item_position( salvage_tool );
         item *usable = salvage_tool->get_usable_item( salvage_string );
@@ -9787,13 +9788,24 @@ void game::butcher()
         if( it->is_corpse() ) {
             corpses.push_back( it );
         } else {
-            if( ( salvage_tool_index != INT_MIN ) && salvage_iuse->valid_to_cut_up( nullptr, *it ) ) {
-                salvageables.push_back( it );
-            }
             if( u.can_disassemble( *it, crafting_inv ).success() ) {
                 disassembles.push_back( it );
             } else if( !first_item_without_tools ) {
                 first_item_without_tools = &*it;
+            }
+            for( item *maybe_valid_salvage_tool : salvage_tools ) {
+
+                if( // item::has_requirements_to_salvage compares target item's materials (and listed salvage requirement)
+                    // to the base item calling ::has_requirements_to_salvage
+                    // Load the actual material requirements elsewhere (no example in push)
+                    maybe_valid_salvage_tool->has_requirements_to_salvage( *it ) ) {
+                    item *usable = maybe_valid_salvage_tool->get_usable_item( salvage_string );
+                    salvage_iuse = dynamic_cast<const salvage_actor *>(
+                                       usable->get_use( salvage_string )->get_actor_ptr() );
+                    if( salvage_iuse->valid_to_cut_up( nullptr, *it ) ) {
+                        salvageables.push_back( it );
+                    }
+                }
             }
         }
     }
@@ -9860,6 +9872,9 @@ void game::butcher()
         // Add corpses, disassembleables, and salvagables to the UI
         add_corpses( kmenu, corpses, i );
         add_disassemblables( kmenu, disassembly_stacks, i );
+        // Need to retarget the salvage_iuse before we get here, somehow. Maybe pass a container of them and have
+        // add_salvagables pick the appopriate one. Or store them in the salvageables container and tie them together as
+        // a std::pair
         if( salvage_iuse && !salvageables.empty() ) {
             add_salvagables( kmenu, salvage_stacks, i, *salvage_iuse );
         }
@@ -9986,6 +10001,7 @@ void game::butcher()
             if( !salvage_iuse || !salvage_tool ) {
                 debugmsg( "null salvage_iuse or salvage_tool" );
             } else {
+                // if we paired up salvagables with tools they need to be reconciled here
                 // Pick index of first item in the salvage stack
                 item *const target = &*salvage_stacks[indexer_index].first;
                 item_location item_loc( map_cursor( u.pos_bub() ), target );
