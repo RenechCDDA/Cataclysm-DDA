@@ -886,7 +886,9 @@ class game
         //private save functions.
         // returns false if saving failed for whatever reason
         bool save_factions_missions_npcs();
-        void reset_npc_dispositions();
+		public:
+        void reset_npc_dispositions( bool avatar_reset = false);
+		private:
         void serialize_master( std::ostream &fout );
         // returns false if saving failed for whatever reason
         bool save_maps();
@@ -1200,7 +1202,10 @@ class game
         character_id next_npc_id; // NOLINT(cata-serialize)
         int next_mission_id = 0; // NOLINT(cata-serialize)
         // Keep track of follower NPC IDs
+		public:
         std::set<character_id> follower_ids; // NOLINT(cata-serialize)
+
+		private:
 
         std::chrono::seconds time_played_at_last_load; // NOLINT(cata-serialize)
         // NOLINTNEXTLINE(cata-serialize)

@@ -3326,9 +3326,15 @@ void game::load_packs( const std::string &msg, const std::vector<mod_id> &packs,
     }
 }
 
-void game::reset_npc_dispositions()
+void game::reset_npc_dispositions( bool avatar_reset )
 {
-    for( character_id elem : follower_ids ) {
+	std::set<character_id> to_reset;
+	if ( avatar_reset ) {
+		to_reset = get_avatar().follower_ids;
+	} else {
+		to_reset = follower_ids;
+	}
+    for( character_id elem : to_reset ) {
         shared_ptr_fast<npc> npc_to_get = overmap_buffer.find_npc( elem );
         if( !npc_to_get )  {
             continue;

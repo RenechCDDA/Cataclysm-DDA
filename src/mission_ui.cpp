@@ -9,10 +9,12 @@
 #include "calendar.h"
 #include "color.h"
 #include "debug.h"
+#include "game.h"
 #include "input_context.h"
 #include "mission.h"
 #include "npc.h"
 #include "output.h"
+#include "overmapbuffer.h"
 #include "string_formatter.h"
 #include "translations.h"
 #include "ui.h"
@@ -118,107 +120,51 @@ void mission_ui_impl::draw_controls()
 
     static int selected_mission = 0;
     bool adjust_selected = false;
-
-    if( last_action == "QUIT" ) {
-        return;
-    } else if( last_action == "UP" ) {
-        adjust_selected = true;
-        ImGui::SetKeyboardFocusHere( -1 );
-        selected_mission--;
-    } else if( last_action == "DOWN" ) {
-        adjust_selected = true;
-        ImGui::SetKeyboardFocusHere( 1 );
-        selected_mission++;
-    } else if( last_action == "NEXT_TAB" || last_action == "RIGHT" ) {
-        adjust_selected = true;
-        selected_mission = 0;
-        switch_tab = selected_tab;
-        ++switch_tab;
-    } else if( last_action == "PREV_TAB" || last_action == "LEFT" ) {
-        adjust_selected = true;
-        selected_mission = 0;
-        switch_tab = selected_tab;
-        --switch_tab;
+    if( ImGui::Button( "RESET DISPOSITION" ) ) {
+        g->reset_npc_dispositions( false );
     }
-
-    ImGuiTabItemFlags_ flags = ImGuiTabItemFlags_None;
-
-    if( ImGui::BeginTabBar( "##TAB_BAR" ) ) {
-        flags = ImGuiTabItemFlags_None;
-        if( switch_tab == mission_ui_tab_enum::ACTIVE ) {
-            flags = ImGuiTabItemFlags_SetSelected;
-            switch_tab = mission_ui_tab_enum::num_tabs;
+    if( ImGui::Button( "RESET DISPOSITION (AVATAR)" ) ) {
+        g->reset_npc_dispositions( true );
+    }
+    ImGui::Separator();
+    int i = 0;
+    draw_colored_text( "GAME follower ids" );
+    for( character_id elem : g->follower_ids ) {
+        i++;
+        shared_ptr_fast<npc> npc_to_get = overmap_buffer.find_npc( elem );
+        if( !npc_to_get )  {
+            continue;
         }
-        if( ImGui::BeginTabItem( _( "ACTIVE" ), nullptr, flags ) ) {
-            selected_tab = mission_ui_tab_enum::ACTIVE;
-            umissions = get_avatar().get_active_missions();
-            ImGui::EndTabItem();
+        draw_colored_text( npc_to_get->name, c_green );
+        ImGui::SameLine();
+        draw_colored_text( std::to_string( elem.get_value() ), c_green );
+        ImGui::SameLine();
+        draw_colored_text( npc_to_get->global_omt_location().to_string(), c_green );
+        ImGui::SameLine();
+        ImGui::PushID( i );
+        if( ImGui::Button( "Send me there!" ) ) {
+            g->place_player_overmap( npc_to_get->global_omt_location() );
         }
-        flags = ImGuiTabItemFlags_None;
-        if( switch_tab == mission_ui_tab_enum::COMPLETED ) {
-            flags = ImGuiTabItemFlags_SetSelected;
-            switch_tab = mission_ui_tab_enum::num_tabs;
+        ImGui::PopID();
+    }
+    ImGui::Separator();
+    draw_colored_text( "AVATAR follower ids" );
+    for( character_id elem : get_avatar().follower_ids ) {
+        shared_ptr_fast<npc> npc_to_get = overmap_buffer.find_npc( elem );
+        if( !npc_to_get )  {
+            continue;
         }
-        if( ImGui::BeginTabItem( _( "COMPLETED" ), nullptr, flags ) ) {
-            selected_tab = mission_ui_tab_enum::COMPLETED;
-            umissions = get_avatar().get_completed_missions();
-            ImGui::EndTabItem();
+        draw_colored_text( npc_to_get->name, c_yellow );
+        ImGui::SameLine();
+        draw_colored_text( std::to_string( elem.get_value() ), c_yellow );
+        ImGui::SameLine();
+        draw_colored_text( npc_to_get->global_omt_location().to_string(), c_green );
+        ImGui::SameLine();
+        ImGui::PushID( i );
+        if( ImGui::Button( "Send me there!" ) ) {
+            g->place_player_overmap( npc_to_get->global_omt_location() );
         }
-        flags = ImGuiTabItemFlags_None;
-        if( switch_tab == mission_ui_tab_enum::FAILED ) {
-            flags = ImGuiTabItemFlags_SetSelected;
-            switch_tab = mission_ui_tab_enum::num_tabs;
-        }
-        if( ImGui::BeginTabItem( _( "FAILED" ), nullptr, flags ) ) {
-            selected_tab = mission_ui_tab_enum::FAILED;
-            umissions = get_avatar().get_failed_missions();
-            ImGui::EndTabItem();
-        }
-        ImGui::EndTabBar();
-    }
-
-    if( selected_mission < 0 ) {
-        selected_mission = 0;
-    }
-
-    if( static_cast<size_t>( selected_mission ) > umissions.size() - 1 ) {
-        selected_mission = umissions.size() - 1;
-    }
-
-    // This action needs to be after umissions is populated
-    if( !umissions.empty() && last_action == "CONFIRM" &&
-        selected_tab == mission_ui_tab_enum::ACTIVE ) {
-        get_avatar().set_active_mission( *umissions[selected_mission] );
-    }
-
-    if( umissions.empty() ) {
-        static const std::map< mission_ui_tab_enum, std::string > nope = {
-            { mission_ui_tab_enum::ACTIVE, translate_marker( "You have no active missions!" ) },
-            { mission_ui_tab_enum::COMPLETED, translate_marker( "You haven't completed any missions!" ) },
-            { mission_ui_tab_enum::FAILED, translate_marker( "You haven't failed any missions!" ) }
-        };
-        ImGui::TextWrapped( "%s", nope.at( selected_tab ).c_str() );
-        return;
-    }
-
-    if( get_avatar().get_active_mission() ) {
-        ImGui::TextWrapped( _( "Current objective: %s" ),
-                            get_avatar().get_active_mission()->name().c_str() );
-    }
-
-    if( ImGui::BeginTable( "##MISSION_TABLE", 2, ImGuiTableFlags_None,
-                           ImVec2( window_width, window_height ) ) ) {
-        // Missions selection is purposefully thinner than the description, it has less to convey.
-        ImGui::TableSetupColumn( _( "Missions" ), ImGuiTableColumnFlags_WidthStretch,
-                                 table_column_width * 0.8 );
-        ImGui::TableSetupColumn( _( "Description" ), ImGuiTableColumnFlags_WidthStretch,
-                                 table_column_width * 1.2 );
-        ImGui::TableHeadersRow();
-        ImGui::TableNextColumn();
-        draw_mission_names( umissions, selected_mission, adjust_selected );
-        ImGui::TableNextColumn();
-        draw_selected_description( umissions, selected_mission );
-        ImGui::EndTable();
+        ImGui::PopID();
     }
 }
 
