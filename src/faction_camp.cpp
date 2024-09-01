@@ -5732,15 +5732,22 @@ static const npc &getAverageJoe()
 }
 
 // mission support
-bool basecamp::distribute_food()
+bool basecamp::distribute_food( bool player_command )
 {
     if( !validate_sort_points() ) {
-        popup( _( "You do not have a camp food zone.  Aborting…" ) );
+        if( player_command ) {
+            popup( _( "You do not have a camp food zone.  Aborting…" ) );
+        } else {
+            debugmsg( "NPC-initiated food distribution at %s failed due to lacking zones", name );
+        }
         return false;
     }
 
-    bool distribute_vitamins = query_yn(
-                                   _( "Do you also wish to distribute comestibles without any calorie value (i.e. multivitamins, mutagens)?" ) );
+    bool distribute_vitamins = false; // NPCs only ever distribute food
+    if( player_command ) {
+        distribute_vitamins = query_yn(
+                                  _( "Do you also wish to distribute comestibles without any calorie value (i.e. multivitamins, mutagens)?" ) );
+    }
 
     map &here = get_map();
     zone_manager &mgr = zone_manager::get_manager();
@@ -5845,7 +5852,9 @@ bool basecamp::distribute_food()
     }
 
     if( nutrients_to_add.kcal() <= 0 && nutrients_to_add.vitamins().empty() ) {
-        popup( _( "No suitable items are located at the drop points…" ) );
+        if( player_command ) {
+            popup( _( "No suitable items are located at the drop points…" ) );
+        }
         return false;
     }
 
@@ -5857,7 +5866,9 @@ bool basecamp::distribute_food()
         popup_msg = _( "You distribute vitamins and medicine to your companions." );
     }
 
-    popup( popup_msg );
+    if( player_command ) {
+        popup( popup_msg );
+    }
     camp_food_supply( nutrients_to_add );
     return true;
 }

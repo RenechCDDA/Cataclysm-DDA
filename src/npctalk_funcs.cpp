@@ -109,6 +109,8 @@ static const mtype_id mon_chicken( "mon_chicken" );
 static const mtype_id mon_cow( "mon_cow" );
 static const mtype_id mon_horse( "mon_horse" );
 
+static const zone_type_id zone_type_CAMP_FOOD( "CAMP_FOOD" );
+
 struct itype;
 
 static void spawn_animal( npc &p, const mtype_id &mon );
@@ -1264,6 +1266,35 @@ npc *pick_follower()
     }
 
     return followers[ menu.ret ];
+}
+
+void talk_function::distribute_food_auto( npc &p )
+{
+    std::optional<basecamp *> bcp = overmap_buffer.find_camp( p.global_omt_location().xy() );
+    if( !bcp ) {
+        debugmsg( "distribute_food_auto called without a basecamp, aborting." );
+        return;
+    }
+    basecamp *npc_camp = *bcp;
+    if( !npc_camp->allowed_access_by( p ) ) {
+        debugmsg( "distribute_food_auto called on npc that isn't allowed to access local basecamp storage, aborting." );
+        return;
+    }
+
+    zone_manager &mgr = zone_manager::get_manager();
+    const tripoint_abs_ms &npc_abs_loc = p.get_location();
+    // 3x3 square with NPC in the center, includes NPC's tile and all adjacent ones, for overflow
+    const map &here = get_map();
+    const tripoint top_left = here.getlocal( npc_abs_loc + point{-1, -1} );
+    const tripoint bottom_right = here.getlocal( npc_abs_loc + point{1, 1} );
+    std::string zone_name = "ERROR IF YOU SEE THIS (dummy zone talk_function::distribute_food_auto)";
+    mgr.add( zone_name, zone_type_CAMP_FOOD, p.get_fac_id(), false, true, top_left, bottom_right );
+    npc_camp->distribute_food( false );
+    // Now we clean up all zones of this type, though there SHOULD only be the one we just made
+    std::vector<zone_data> p_zones = mgr.get_zones( zone_type_CAMP_FOOD, npc_abs_loc, p.get_fac_id() );
+    for( zone_data &food_zone : p_zones ) {
+        mgr.remove( food_zone );
+    }
 }
 
 void talk_function::copy_npc_rules( npc &p )

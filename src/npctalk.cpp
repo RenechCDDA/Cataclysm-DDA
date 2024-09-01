@@ -4294,6 +4294,27 @@ talk_effect_fun_t::func f_bulk_trade_accept( const JsonObject &jo, std::string_v
     };
 }
 
+talk_effect_fun_t::func f_distribute_food_auto( const JsonObject &jo, std::string_view member,
+        const std::string_view, bool is_npc )
+{
+    dbl_or_var dov_quantity;
+    if( jo.has_member( member ) ) {
+        dov_quantity = get_dbl_or_var( jo, member, false, -1 );
+    } else {
+        dov_quantity.min.dbl_val = -1;
+    }
+
+    bool is_trade = member == "u_bulk_trade_accept" || member == "npc_bulk_trade_accept";
+
+    return [is_trade, is_npc, dov_quantity]( dialogue & d ) {
+        talker *seller = d.actor( is_npc );
+        talker *buyer = d.actor( !is_npc );
+        itype_id traded_itype_id = d.cur_item;
+        int number_to_transfer = dov_quantity.evaluate( d );
+
+        };
+}
+
 talk_effect_fun_t::func f_npc_gets_item( bool to_use )
 {
     return [to_use]( dialogue const & d ) {
@@ -6743,6 +6764,7 @@ parsers = {
     { "u_remove_item_with", "npc_remove_item_with", jarg::member, &talk_effect_fun::f_remove_item_with },
     { "u_bulk_trade_accept", "npc_bulk_trade_accept", jarg::member, &talk_effect_fun::f_bulk_trade_accept },
     { "u_bulk_donate", "npc_bulk_donate", jarg::member, &talk_effect_fun::f_bulk_trade_accept },
+    { "u_distribute_food", "npc_distribute_food", jarg::member, &talk_effect_fun::f_distribute_food_auto },
     { "u_cast_spell", "npc_cast_spell", jarg::member, &talk_effect_fun::f_cast_spell },
     { "u_map_run_item_eocs", "npc_map_run_item_eocs", jarg::member, &talk_effect_fun::f_map_run_item_eocs },
     { "companion_mission", jarg::string, &talk_effect_fun::f_companion_mission },
@@ -6913,6 +6935,7 @@ void talk_effect_t::parse_string_effect( const std::string &effect_id, const Jso
             WRAP( clear_overrides ),
             WRAP( pick_style ),
             WRAP( do_disassembly ),
+            WRAP( distribute_food_auto ),
             WRAP( nothing )
 #undef WRAP
         }
