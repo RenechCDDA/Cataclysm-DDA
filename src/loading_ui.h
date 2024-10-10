@@ -7,7 +7,7 @@
 namespace loading_ui
 {
 void show( const std::string &context, const std::string &step );
-void done();
+void done( bool pause_or_resume = false );
 } // namespace loading_ui
 
 #endif // CATA_SRC_LOADING_UI_H

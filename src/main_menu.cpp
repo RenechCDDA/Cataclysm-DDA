@@ -31,6 +31,7 @@
 #include "gamemode.h"
 #include "get_version.h"
 #include "help.h"
+#include "loading_ui.h"
 #include "localized_comparator.h"
 #include "mapbuffer.h"
 #include "mapsharing.h"
@@ -1077,6 +1078,7 @@ bool main_menu::new_character_tab()
                 play_type = character_type::FULL_RANDOM;
                 break;
         }
+        loading_ui::done( /*bool pause_or_resume=*/true );
         if( !pc.create( play_type ) ) {
             load_char_templates();
             MAPBUFFER.clear();

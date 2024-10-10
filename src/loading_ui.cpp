@@ -152,11 +152,16 @@ void loading_ui::show( const std::string &context, const std::string &step )
     inp_mngr.pump_events();
 }
 
-void loading_ui::done()
+void loading_ui::done( bool pause_or_resume )
 {
     if( gLUI != nullptr ) {
 #ifdef TILES
-        gLUI->chosen_load_img = cata_path();
+        static cata_path cached_load_img;
+        if( pause_or_resume ) {
+            std::swap( cached_load_img, gLUI->chosen_load_img );
+        } else {
+            gLUI->chosen_load_img = cata_path();
+        }
 #endif
         delete gLUI->ui;
         delete gLUI->bg;

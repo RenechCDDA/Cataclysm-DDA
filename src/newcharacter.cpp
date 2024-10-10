@@ -34,6 +34,7 @@
 #include "inventory.h"
 #include "item.h"
 #include "json.h"
+#include "loading_ui.h"
 #include "localized_comparator.h"
 #include "magic.h"
 #include "magic_enchantment.h"
@@ -790,6 +791,8 @@ bool avatar::create( character_type type, const std::string &tempname )
             return false;
         }
     } while( !tabs.complete );
+
+    loading_ui::done( /*bool pause_or_resume=*/true );
 
     if( pool == pool_type::TRANSFER ) {
         return true;
