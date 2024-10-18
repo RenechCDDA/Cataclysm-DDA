@@ -9,6 +9,9 @@
 #include "demangle.h"
 #include "type_id.h"
 
+class JsonValue;
+struct MOD_INFORMATION;
+
 /**
  * Mod Tracking:
  *
@@ -76,8 +79,51 @@ struct has_src_member<T, std::void_t<decltype( std::declval<T &>().src.emplace_b
         // We need to make sure we're keeping where this entity has been loaded
         // If the id this was last loaded with is not this one, discard the history and start again
         if( n.src.back() == o.src.back() ) {
-            throw mod_error( string_format( "%s (%s) has two definitions from the same source (%s)!",
-                                            n.id.str(), demangle( typeid( T ).name() ), n.src.back().second.str() ) );
+            bool is_core_dda = n.src.back().second.str() == "dda";
+            const MOD_INFORMATION &mod = *n.src.back().second;
+            cata_path where_to_look = is_core_dda ? PATH_INFO::datadir_path() : PATH_INFO::moddir() + mod.path;
+            JsonValue *first_dupe = nullptr;
+            JsonValue *second_dupe = nullptr;
+            for( const cata_path &file : where_to_look ) {
+                JsonValue jsin = json_loader::from_path( file );
+                if( jsin.test_object() ) {
+                    JsonObject jo = jsin.get_object();
+                    const std::string type = jo.get_string( "type" );
+                    if( type == demangle( typeid( T ).name() ) ) {
+                        std::optional<JsonValue> member_opt = jo.get_member_opt( type );
+                        if( member_opt.has_value() ) {
+                            if( !first_dupe ) {
+                                first_dupe = *member_opt;
+                            } else if( !second_dupe ) {
+                                second_dupe = *member_opt;
+                            }
+                        }
+                    }
+                } else if( jsin.test_array() ) {
+                    JsonArray ja = jsin.get_array();
+                    for( JsonObject jo : ja ) {
+                        const std::string type = jo.get_string( "type" );
+                        if( type == demangle( typeid( T ).name() ) ) {
+                            std::optional<JsonValue> member_opt = jo.get_member_opt( type );
+                            if( member_opt.has_value() ) {
+                                if( !first_dupe ) {
+                                    first_dupe = *member_opt;
+                                } else if( !second_dupe ) {
+                                    second_dupe = *member_opt;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // re-read all the json! object we're looking it is `p`
+            // if p.type == n.type && p.id == n.id, we must be one of the duplicate objects
+            // store path entry 1, 2, (more???) in a vector
+            // print in the throw error
+            throw mod_error(
+                string_format( "%s (%s) has two definitions from the same source (%s)! Locations %s and %s",
+                               n.id.str(), demangle( typeid( T ).name() ),
+                               n.src.back().second.str(), first_dupe->str(), second_dupe->str() ) );
         }
     }
 
