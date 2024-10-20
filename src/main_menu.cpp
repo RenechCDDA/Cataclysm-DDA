@@ -124,6 +124,7 @@ enum class main_menu_opts : int {
     SETTINGS,
     HELP,
     CREDITS,
+    CREDITS_RANDOM,
     QUIT,
     NUM_MENU_OPTS,
 };
@@ -223,6 +224,60 @@ std::vector<int> main_menu::print_menu_items( const catacurses::window &w_in,
     return ret;
 }
 
+class random_credits_ui
+{
+        friend class random_credits_ui_impl;
+    public:
+        void draw_random_credits_ui();
+};
+
+class random_credits_ui_impl : public cataimgui::window
+{
+    public:
+        explicit random_credits_ui_impl() : cataimgui::window( _( "<3 <3 <3" ),
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove ) {
+        }
+        std::string contributor_we_love;
+
+    protected:
+        void draw_controls() override;
+};
+
+std::unordered_set<std::string> contributors = {"Renechcdda", "Fris0uman", "Kevin", "Evil Kevin"};
+
+void random_credits_ui_impl::draw_controls()
+{
+    ImGui::SetWindowSize( ImVec2( str_width_to_pixels( TERMX ) / 2, str_height_to_pixels( TERMY ) / 2 ),
+                          ImGuiCond_Once );
+    cataimgui::draw_colored_text( _( "Special thanks to:" ) );
+    cataimgui::draw_colored_text( string_format( "%s", contributor_we_love ), c_green );
+    cataimgui::draw_colored_text( string_format( _( "And %i+ other contributors!" ),
+                                  contributors.size() ) );
+    if( ImGui::Button( "Show another contributor" ) ) {
+        contributor_we_love = random_entry( contributors );
+    }
+}
+
+void random_credits_ui::draw_random_credits_ui()
+{
+    input_context ctxt;
+    random_credits_ui_impl p_impl;
+    ctxt.register_action( "HELP_KEYBINDINGS" );
+    ctxt.register_action( "QUIT" );
+    std::string action;
+    p_impl.contributor_we_love = random_entry( contributors );
+
+    ui_manager::redraw();
+
+    while( p_impl.get_is_open() ) {
+        ui_manager::redraw();
+        action = ctxt.handle_input( 5 );
+        if( action == "QUIT" ) {
+            break;
+        }
+    }
+}
+
 void main_menu::display_sub_menu( int sel, const point &bottom_left, int sel_line )
 {
     main_menu_sub_button_map.clear();
@@ -232,6 +287,8 @@ void main_menu::display_sub_menu( int sel, const point &bottom_left, int sel_lin
     switch( sel_o ) {
         case main_menu_opts::CREDITS:
             display_text( mmenu_credits, _( "Credits" ), sel_line );
+            return;
+        case main_menu_opts::CREDITS_RANDOM:
             return;
         case main_menu_opts::MOTD:
             //~ Message Of The Day
@@ -826,6 +883,10 @@ bool main_menu::opening_screen()
                         }
                     }
                     break;
+                case main_menu_opts::CREDITS_RANDOM:
+                    random_credits_ui new_instance;
+                    new_instance.draw_random_credits_ui();
+                    break;
                 case main_menu_opts::LOADCHAR:
                     max_item_count = world_generator->get_all_worlds().size();
                     break;
@@ -916,8 +977,8 @@ bool main_menu::opening_screen()
                     } else if( sel2 == 4 ) { /// Colors
                         all_colors.show_gui();
                     } else if( sel2 == 5 ) { /// ImGui demo
-                        demo_ui demo;
-                        demo.run();
+                        random_credits_ui new_instance;
+                        new_instance.draw_random_credits_ui();
                     }
                     break;
                 case main_menu_opts::WORLD:
@@ -939,6 +1000,10 @@ bool main_menu::opening_screen()
                     break;
                 case main_menu_opts::MOTD:
                 case main_menu_opts::CREDITS:
+                case main_menu_opts::CREDITS_RANDOM:
+                    random_credits_ui new_instance;
+                    new_instance.draw_random_credits_ui();
+                    break;
                 default:
                     break;
             }
