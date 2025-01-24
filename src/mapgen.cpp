@@ -5342,53 +5342,62 @@ ret_val<void> mapgen_function_json_base::has_vehicle_collision(
 
 static void GENERATOR_break_stuff( const mapgendata &md )
 {
+    // Underground? This is definitely a bug.
+    // FIXME: Add a debug message when the condition for running this generator isn't RISK_HIGH/RISK_EXTREME
+    if( md.m.get_abs_sub().z() < 0 ) {
+        return;
+    }
+    std::list<tripoint_bub_ms> all_points_in_map;
     // Placeholder / FIXME
     // This assumes that we're only dealing with regular 24x24 OMTs. That is likely not the case.
     for( int i = 0; i < SEEX * 2; i++ ) {
         for( int n = 0; n < SEEY * 2; n++ ) {
             tripoint_bub_ms current_tile( i, n, md.m.get_abs_sub().z() );
-            // Do nothing at random!;
-            if( x_in_y( 65, 100 ) ) {
-                continue;
-            }
-            // Bash stuff at random!
-            if( x_in_y( 20, 100 ) ) {
-                md.m.bash( current_tile, rng( 6, 60 ) );
-            }
-            // Move stuff at random!
-            // Note, because of the way this iterates and that it doesn't exclude items that were previously moved, it biases
-            // moving items towards the southeast corner of the map.
-            // In other words, FIXME.
-            auto item_iterator = md.m.i_at( current_tile.xy() ).begin();
-            while( item_iterator != md.m.i_at( current_tile.xy() ).end() ) {
-                if( x_in_y( 10, 100 ) ) {
-                    // pick a new spot...
-                    tripoint_bub_ms destination_tile( current_tile.x() + rng( -1, 1 ),
-                                                      current_tile.y() + rng( -1, 1 ),
-                                                      current_tile.z() );
-                    // oops, don't place out of bounds. just skip moving
-                    const bool outbounds_X = destination_tile.x() < 0 || destination_tile.x() >= SEEX * 2;
-                    const bool outbounds_Y = destination_tile.y() < 0 || destination_tile.y() >= SEEY * 2;
-                    if( outbounds_X || outbounds_Y ) {
-                        item_iterator++;
-                        continue;
-                    } else {
-                        // add a copy of our item to the destination...
-                        md.m.add_item( destination_tile, *item_iterator );
-                        // and erase the one at our source.
-                        item_iterator = md.m.i_at( current_tile.xy() ).erase( item_iterator );
-                    }
-                } else {
+            all_points_in_map.push_back( current_tile );
+        }
+    }
+
+    for( int i = 0; i < all_points_in_map.size(); i++ ) {
+        // Pick a tile at random!
+        tripoint_bub_ms current_tile = random_entry( all_points_in_map );
+        // Do nothing at random!;
+        if( x_in_y( 65, 100 ) ) {
+            continue;
+        }
+        // Bash stuff at random!
+        if( x_in_y( 20, 100 ) ) {
+            md.m.bash( current_tile, rng( 6, 60 ) );
+        }
+        // Move stuff at random!
+        auto item_iterator = md.m.i_at( current_tile.xy() ).begin();
+        while( item_iterator != md.m.i_at( current_tile.xy() ).end() ) {
+            if( x_in_y( 10, 100 ) ) {
+                // pick a new spot...
+                tripoint_bub_ms destination_tile( current_tile.x() + rng( -1, 1 ),
+                                                  current_tile.y() + rng( -1, 1 ),
+                                                  current_tile.z() );
+                // oops, don't place out of bounds. just skip moving
+                const bool outbounds_X = destination_tile.x() < 0 || destination_tile.x() >= SEEX * 2;
+                const bool outbounds_Y = destination_tile.y() < 0 || destination_tile.y() >= SEEY * 2;
+                if( outbounds_X || outbounds_Y ) {
                     item_iterator++;
+                    continue;
+                } else {
+                    // add a copy of our item to the destination...
+                    md.m.add_item( destination_tile, *item_iterator );
+                    // and erase the one at our source.
+                    item_iterator = md.m.i_at( current_tile.xy() ).erase( item_iterator );
                 }
+            } else {
+                item_iterator++;
             }
-            // Set some fields at random!
-            if( x_in_y( 1, 100 ) ) {
-                md.m.add_field( current_tile, field_fd_blood );
-            }
-            if( x_in_y( 1, 2000 ) ) {
-                md.m.add_field( current_tile, field_fd_fire );
-            }
+        }
+        // Set some fields at random!
+        if( x_in_y( 1, 100 ) ) {
+            md.m.add_field( current_tile, field_fd_blood );
+        }
+        if( x_in_y( 1, 3500 ) ) {
+            md.m.add_field( current_tile, field_fd_fire );
         }
     }
 }
