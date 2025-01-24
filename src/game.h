@@ -1169,6 +1169,9 @@ class game
         // Please note that this does not count ignored monsters, so this value might
         // be 0 even if the player currently sees some monsters.
         int mostseen = 0;
+
+        // HACK. BAD HACK. If you see this in a PR, don't merge! Call 555-RenechCDDA **immediately**!
+        std::unordered_set<tripoint_abs_omt> generators_applied;
     private:
         shared_ptr_fast<Character> u_shared_ptr; // NOLINT(cata-serialize)
 
