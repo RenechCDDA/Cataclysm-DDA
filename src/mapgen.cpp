@@ -83,6 +83,9 @@
 #include "weighted_list.h"
 #include "creature_tracker.h"
 
+static const field_type_str_id field_fd_blood( "fd_blood" );
+static const field_type_str_id field_fd_fire( "fd_fire" );
+
 static const furn_str_id furn_f_ash( "f_ash" );
 static const furn_str_id furn_f_bed( "f_bed" );
 static const furn_str_id furn_f_console( "f_console" );
@@ -5337,6 +5340,59 @@ ret_val<void> mapgen_function_json_base::has_vehicle_collision(
     return objects.has_vehicle_collision( dat, offset );
 }
 
+static void GENERATOR_break_stuff( const mapgendata &md )
+{
+    // Placeholder / FIXME
+    // This assumes that we're only dealing with regular 24x24 OMTs. That is likely not the case.
+    for( int i = 0; i < SEEX * 2; i++ ) {
+        for( int n = 0; n < SEEY * 2; n++ ) {
+            tripoint_bub_ms current_tile( i, n, md.m.get_abs_sub().z() );
+            // Do nothing at random!;
+            if( x_in_y( 65, 100 ) ) {
+                continue;
+            }
+            // Bash stuff at random!
+            if( x_in_y( 20, 100 ) ) {
+                md.m.bash( current_tile, rng( 6, 60 ) );
+            }
+            // Move stuff at random!
+            // Note, because of the way this iterates and that it doesn't exclude items that were previously moved, it biases
+            // moving items towards the southeast corner of the map.
+            // In other words, FIXME.
+            auto item_iterator = md.m.i_at( current_tile.xy() ).begin();
+            while( item_iterator != md.m.i_at( current_tile.xy() ).end() ) {
+                if( x_in_y( 10, 100 ) ) {
+                    // pick a new spot...
+                    tripoint_bub_ms destination_tile( current_tile.x() + rng( -1, 1 ),
+                                                      current_tile.y() + rng( -1, 1 ),
+                                                      current_tile.z() );
+                    // oops, don't place out of bounds. just skip moving
+                    const bool outbounds_X = destination_tile.x() < 0 || destination_tile.x() >= SEEX * 2;
+                    const bool outbounds_Y = destination_tile.y() < 0 || destination_tile.y() >= SEEY * 2;
+                    if( outbounds_X || outbounds_Y ) {
+                        item_iterator++;
+                        continue;
+                    } else {
+                        // add a copy of our item to the destination...
+                        md.m.add_item( destination_tile, *item_iterator );
+                        // and erase the one at our source.
+                        item_iterator = md.m.i_at( current_tile.xy() ).erase( item_iterator );
+                    }
+                } else {
+                    item_iterator++;
+                }
+            }
+            // Set some fields at random!
+            if( x_in_y( 1, 100 ) ) {
+                md.m.add_field( current_tile, field_fd_blood );
+            }
+            if( x_in_y( 1, 2000 ) ) {
+                md.m.add_field( current_tile, field_fd_fire );
+            }
+        }
+    }
+}
+
 static ret_val<void> apply_mapgen_in_phases(
     const mapgendata &md, const std::vector<jmapgen_setmap> &setmap_points,
     const jmapgen_objects &objects, const tripoint_rel_ms &offset, const std::string &context,
@@ -5373,6 +5429,12 @@ static ret_val<void> apply_mapgen_in_phases(
     cata_assert( setmap_point == setmap_points.end() );
 
     resolve_regional_terrain_and_furniture( md );
+
+    // placeholder so I don't have to define a new flag right now. All city buildings should have risk high or risk extreme.
+    if( md.terrain_type()->has_flag( oter_flags::risk_extreme ) ||
+        md.terrain_type()->has_flag( oter_flags::risk_high ) ) {
+        GENERATOR_break_stuff( md );
+    }
 
     return ret_val<void>::make_success();
 }
