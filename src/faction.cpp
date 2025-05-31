@@ -882,7 +882,9 @@ void faction_manager::display() const
         ui_manager::redraw_invalidated();
 
 
-        if( !p_impl.get_is_open() ) {
+        p_impl.last_action = ctxt.handle_input();
+
+        if( p_impl.last_action == "QUIT" || !p_impl.get_is_open() ) {
             break;
         }
     }
