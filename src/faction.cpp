@@ -864,324 +864,39 @@ int npc::faction_display( const catacurses::window &fac_w, const int width ) con
 
 void faction_manager::display() const
 {
-    catacurses::window w_missions;
-    int entries_per_page = 0;
+    input_context ctxt;
+    faction_manager_impl p_impl;
 
-    ui_adaptor ui;
-    ui.on_screen_resize( [&]( ui_adaptor & ui ) {
-        const point term( TERMY > FULL_SCREEN_HEIGHT ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0,
-                          TERMX > FULL_SCREEN_WIDTH ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0 );
-
-        w_missions = catacurses::newwin( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
-                                         point( term.y, term.x ) );
-
-        entries_per_page = FULL_SCREEN_HEIGHT - 4;
-
-        ui.position_from_window( w_missions );
-    } );
-    ui.mark_resize();
-
-    enum class tab_mode : int {
-        TAB_MYFACTION = 0,
-        TAB_FOLLOWERS,
-        TAB_OTHERFACTIONS,
-        TAB_LORE,
-        TAB_CREATURES,
-        NUM_TABS,
-        FIRST_TAB = 0,
-        LAST_TAB = NUM_TABS - 1
-    };
-    g->validate_camps();
-    g->validate_npc_followers();
-    tab_mode tab = tab_mode::FIRST_TAB;
-    size_t selection = 0;
-    input_context ctxt( "FACTION_MANAGER" );
-    ctxt.register_action( "ANY_INPUT" );
     ctxt.register_navigate_ui_list();
     ctxt.register_leftright();
     ctxt.register_action( "NEXT_TAB" );
     ctxt.register_action( "PREV_TAB" );
-    ctxt.register_action( "CONFIRM" );
-    ctxt.register_action( "QUIT" );
+    ctxt.register_action( "SELECT" );
+    ctxt.register_action( "MOUSE_MOVE" );
     ctxt.register_action( "HELP_KEYBINDINGS" );
+    ctxt.register_action( "QUIT" );
+    // Smooths out our handling, makes tabs load immediately after input instead of waiting for next.
+    ctxt.set_timeout( 10 );
 
-    std::vector<npc *> followers;
-    std::vector<const faction *> valfac; // Factions that we know of.
-    npc *guy = nullptr;
-    const faction *cur_fac = nullptr;
-    bool interactable = false;
-    bool radio_interactable = false;
-    basecamp *camp = nullptr;
-    std::vector<basecamp *> camps;
-    size_t active_vec_size = 0;
-    std::vector<std::pair<snippet_id, std::string>> lore; // Lore we have seen
-    std::pair<snippet_id, std::string> *snippet = nullptr;
-    std::vector<mtype_id> creatures; // Creatures we've recorded
-    mtype_id cur_creature = mtype_id::NULL_ID();
-
-    ui.on_redraw( [&]( const ui_adaptor & ) {
-        werase( w_missions );
-
-        mvwvline( w_missions, point( 30, 3 ), BORDER_COLOR, LINE_XOXO, FULL_SCREEN_HEIGHT - 4 );
-
-        const std::vector<std::pair<tab_mode, std::string>> tabs = {
-            { tab_mode::TAB_MYFACTION, _( "YOUR FACTION" ) },
-            { tab_mode::TAB_FOLLOWERS, _( "YOUR FOLLOWERS" ) },
-            { tab_mode::TAB_OTHERFACTIONS, _( "OTHER FACTIONS" ) },
-            { tab_mode::TAB_LORE, _( "LORE" ) },
-            { tab_mode::TAB_CREATURES, _( "CREATURES" ) },
-        };
-        draw_tabs( w_missions, tabs, tab );
-        draw_border_below_tabs( w_missions );
-
-        wattron( w_missions, BORDER_COLOR );
-        mvwaddch( w_missions, point( 30, 2 ),
-                  tab == tab_mode::TAB_FOLLOWERS ? ' ' : LINE_OXXX ); // ^|^
-        mvwaddch( w_missions, point( 30, FULL_SCREEN_HEIGHT - 1 ), LINE_XXOX ); // _|_
-        wattroff( w_missions, BORDER_COLOR );
-        const nc_color col = c_white;
-
-        // entries_per_page * page number
-        const size_t top_of_page = entries_per_page * ( selection / entries_per_page );
-
-        switch( tab ) {
-            case tab_mode::TAB_MYFACTION: {
-                const std::string no_camp = _( "You have no camps" );
-                if( active_vec_size > 0 ) {
-                    draw_scrollbar( w_missions, selection, entries_per_page, active_vec_size,
-                                    point( 0, 3 ) );
-                    for( size_t i = top_of_page; i < active_vec_size && i < top_of_page + entries_per_page; i++ ) {
-                        const int y = i - top_of_page + 3;
-                        trim_and_print( w_missions, point( 1, y ), 28, selection == i ? hilite( col ) : col,
-                                        camps[i]->camp_name() );
-                    }
-                    if( camp ) {
-                        camp->faction_display( w_missions, 31 );
-                    } else {
-                        mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_camp );
-                    }
-                    break;
-                } else {
-                    mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_camp );
-                }
-            }
-            break;
-            case tab_mode::TAB_FOLLOWERS: {
-                const std::string no_ally = _( "You have no followers" );
-                if( !followers.empty() ) {
-                    draw_scrollbar( w_missions, selection, entries_per_page, active_vec_size,
-                                    point( 0, 3 ) );
-                    for( size_t i = top_of_page; i < active_vec_size && i < top_of_page + entries_per_page; i++ ) {
-                        const int y = i - top_of_page + 3;
-                        trim_and_print( w_missions, point( 1, y ), 28, selection == i ? hilite( col ) : col,
-                                        followers[i]->disp_name() );
-                    }
-                    if( guy ) {
-                        int retval = guy->faction_display( w_missions, 31 );
-                        if( retval == 2 ) {
-                            radio_interactable = true;
-                        } else if( retval == 1 ) {
-                            interactable = true;
-                        }
-                    } else {
-                        mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_ally );
-                    }
-                    break;
-                } else {
-                    mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_ally );
-                }
-            }
-            break;
-            case tab_mode::TAB_OTHERFACTIONS: {
-                const std::string no_fac = _( "You don't know of any factions." );
-                if( active_vec_size > 0 ) {
-                    draw_scrollbar( w_missions, selection, entries_per_page, active_vec_size,
-                                    point( 0, 3 ) );
-                    for( size_t i = top_of_page; i < active_vec_size && i < top_of_page + entries_per_page; i++ ) {
-                        const int y = i - top_of_page + 3;
-                        trim_and_print( w_missions, point( 1, y ), 28, selection == i ? hilite( col ) : col,
-                                        _( valfac[i]->name ) );
-                    }
-                    if( cur_fac ) {
-                        cur_fac->faction_display( w_missions, 31 );
-                    } else {
-                        mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_fac );
-                    }
-                    break;
-                } else {
-                    mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_fac );
-                }
-            }
-            break;
-            case tab_mode::TAB_LORE: {
-                const std::string no_lore = _( "You haven't learned anything about the world." );
-                if( active_vec_size > 0 ) {
-                    draw_scrollbar( w_missions, selection, entries_per_page, active_vec_size,
-                                    point( 0, 3 ) );
-                    for( size_t i = top_of_page; i < active_vec_size && i < top_of_page + entries_per_page; i++ ) {
-                        const int y = i - top_of_page + 3;
-                        trim_and_print( w_missions, point( 1, y ), 28, selection == i ? hilite( col ) : col,
-                                        _( lore[i].second ) );
-                    }
-                    if( snippet != nullptr ) {
-                        int y = 2;
-                        fold_and_print( w_missions, point( 31, ++y ), getmaxx( w_missions ) - 31 - 2, c_light_gray,
-                                        SNIPPET.get_snippet_by_id( snippet->first ).value().translated() );
-                    } else {
-                        mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_lore );
-                    }
-                    break;
-                } else {
-                    mvwprintz( w_missions, point( 31, 4 ), c_light_red, no_lore );
-                }
-            }
-            break;
-            case tab_mode::TAB_CREATURES: {
-                const std::string no_creatures =
-                    _( "You haven't recorded sightings of any creatures.  Taking photos can be a good way to keep track of them." );
-                const int w = getmaxx( w_missions ) - 31 - 2;
-                if( active_vec_size > 0 ) {
-                    draw_scrollbar( w_missions, selection, entries_per_page, active_vec_size,
-                                    point( 0, 3 ) );
-                    for( size_t i = top_of_page; i < active_vec_size && i < top_of_page + entries_per_page; i++ ) {
-                        const int y = i - top_of_page + 3;
-                        trim_and_print( w_missions, point( 1, y ), 28, selection == i ? hilite( col ) : col,
-                                        string_format( "%s  %s", colorize( creatures[i]->sym,
-                                                       selection == i ? hilite( creatures[i]->color ) : creatures[i]->color ),
-                                                       creatures[i]->nname() ) );
-                    }
-                    if( !cur_creature.is_null() ) {
-                        cur_creature->faction_display( w_missions, point( 31, 3 ), w );
-                    } else {
-                        fold_and_print( w_missions, point( 31, 4 ), w, c_light_red, no_creatures );
-                    }
-                    break;
-                } else {
-                    fold_and_print( w_missions, point( 31, 4 ), w, c_light_red, no_creatures );
-                }
-            }
-            break;
-            default:
-                break;
-        }
-        wnoutrefresh( w_missions );
-    } );
-
-    avatar &player_character = get_avatar();
     while( true ) {
-        // create a list of NPCs, visible and the ones on overmapbuffer
-        followers.clear();
-        for( const character_id &elem : g->get_follower_list() ) {
-            shared_ptr_fast<npc> npc_to_get = overmap_buffer.find_npc( elem );
-            if( !npc_to_get ) {
-                continue;
-            }
-            npc *npc_to_add = npc_to_get.get();
-            followers.push_back( npc_to_add );
-        }
-        valfac.clear();
-        for( const auto &elem : g->faction_manager_ptr->all() ) {
-            if( elem.second.known_by_u && elem.second.id != faction_your_followers ) {
-                valfac.push_back( &elem.second );
-            }
-        }
-        guy = nullptr;
-        cur_fac = nullptr;
-        snippet = nullptr;
-        cur_creature = mtype_id::NULL_ID();
-        interactable = false;
-        radio_interactable = false;
-        camp = nullptr;
-        // create a list of faction camps
-        camps.clear();
-        for( tripoint_abs_omt elem : player_character.camps ) {
-            std::optional<basecamp *> p = overmap_buffer.find_camp( elem.xy() );
-            if( !p ) {
-                continue;
-            }
-            basecamp *temp_camp = *p;
-            if( temp_camp->get_owner() != player_character.get_faction()->id ) {
-                // Don't display NPC camps as ours
-                continue;
-            }
-            camps.push_back( temp_camp );
-        }
-        lore.clear();
-        for( const auto &elem : player_character.get_snippets() ) {
-            std::optional<translation> name = SNIPPET.get_name_by_id( elem );
-            if( name.has_value() ) {
-                if( !name->empty() ) {
-                    lore.emplace_back( elem, name->translated() );
-                }
-            }
-        }
-        auto compare_second =
-            []( const std::pair<snippet_id, std::string> &a,
-        const std::pair<snippet_id, std::string> &b ) {
-            return localized_compare( a.second, b.second );
-        };
-        std::sort( lore.begin(), lore.end(), compare_second );
-        if( tab < tab_mode::FIRST_TAB || tab >= tab_mode::NUM_TABS ) {
-            debugmsg( "The sanity check failed because tab=%d", static_cast<int>( tab ) );
-            tab = tab_mode::FIRST_TAB;
-        }
-        creatures.clear();
-        creatures.reserve( player_character.get_known_monsters().size() );
-        creatures.insert( creatures.end(), player_character.get_known_monsters().begin(),
-                          player_character.get_known_monsters().end() );
-        std::sort( creatures.begin(), creatures.end(), []( const mtype_id & a, const mtype_id & b ) {
-            return localized_compare( a->nname(), b->nname() );
-        } );
-        active_vec_size = camps.size();
-        if( tab == tab_mode::TAB_FOLLOWERS ) {
-            if( selection < followers.size() ) {
-                guy = followers[selection];
-            }
-            active_vec_size = followers.size();
-        } else if( tab == tab_mode::TAB_MYFACTION ) {
-            if( selection < camps.size() ) {
-                camp = camps[selection];
-            }
-            active_vec_size = camps.size();
-        } else if( tab == tab_mode::TAB_OTHERFACTIONS ) {
-            if( selection < valfac.size() ) {
-                cur_fac = valfac[selection];
-            }
-            active_vec_size = valfac.size();
-        } else if( tab == tab_mode::TAB_LORE ) {
-            if( selection < lore.size() ) {
-                snippet = &lore[selection];
-            }
-            active_vec_size = lore.size();
-        } else if( tab == tab_mode::TAB_CREATURES ) {
-            if( selection < creatures.size() ) {
-                cur_creature = creatures[selection];
-            }
-            active_vec_size = creatures.size();
-        }
+        ui_manager::redraw_invalidated();
 
-        ui_manager::redraw();
-        const std::string action = ctxt.handle_input();
-        if( action == "LEFT" || action == "PREV_TAB" || action == "RIGHT" || action == "NEXT_TAB" ) {
-            // necessary to use inc_clamp_wrap
-            static_assert( static_cast<int>( tab_mode::FIRST_TAB ) == 0 );
-            tab = inc_clamp_wrap( tab, action == "RIGHT" || action == "NEXT_TAB", tab_mode::NUM_TABS );
-            selection = 0;
-        } else if( navigate_ui_list( action, selection, 10, active_vec_size, true ) ) {
-        } else if( action == "CONFIRM" ) {
-            if( tab == tab_mode::TAB_FOLLOWERS && guy ) {
-                if( guy->has_companion_mission() ) {
 
-                    talk_function::basecamp_mission( *guy );
-
-                } else if( interactable || radio_interactable ) {
-                    player_character.talk_to( get_talker_for( *guy ), radio_interactable );
-                }
-            } else if( tab == tab_mode::TAB_MYFACTION && camp ) {
-                camp->query_new_name();
-            }
-        } else if( action == "QUIT" ) {
+        if( !p_impl.get_is_open() ) {
             break;
         }
+    }
+}
+
+void faction_manager_impl::draw_controls()
+{
+    ImGui::SetWindowSize( ImVec2( window_width, window_height ), ImGuiCond_Once );
+    ImGui::Text( "Hello, world!" );
+    // random stuff to make sure controls work
+    if( ImGui::Button( "Show me an error" ) ) {
+        debugmsg( "Congratulations this is an error! Prepare to crash, and make it double!" );
+    }
+    if( ImGui::Button( "Close me!" ) ) {
+        is_open = false;
     }
 }

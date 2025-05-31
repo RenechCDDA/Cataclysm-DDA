@@ -12,13 +12,18 @@
 #include <utility>
 #include <vector>
 
+#include "cata_imgui.h"
 #include "character_id.h"
 #include "color.h"
+#include "game_constants.h"
 #include "generic_factory.h"
+#include "imgui/imgui.h"
 #include "shop_cons_rate.h"
 #include "stomach.h"
 #include "translation.h"
+#include "translations.h"
 #include "type_id.h"
+#include "ui_manager.h"
 
 enum class vitamin_type : int;
 
@@ -199,6 +204,25 @@ class faction_manager
         }
 
         faction *get( const faction_id &id, bool complain = true );
+};
+
+class faction_manager_impl : public cataimgui::window
+{
+    public:
+        explicit faction_manager_impl() : cataimgui::window( _( "Faction tab IDK" ),
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav ) {
+        }
+        std::string last_action;
+    private:
+        // We may want a different size, this is blindly copied from mission UI
+        float window_width = std::clamp( float( str_width_to_pixels( EVEN_MINIMUM_TERM_WIDTH ) ),
+                                         ImGui::GetMainViewport()->Size.x / 2,
+                                         ImGui::GetMainViewport()->Size.x );
+        float window_height = std::clamp( float( str_height_to_pixels( EVEN_MINIMUM_TERM_HEIGHT ) ),
+                                          ImGui::GetMainViewport()->Size.y / 2,
+                                          ImGui::GetMainViewport()->Size.y );
+    protected:
+        void draw_controls() override;
 };
 
 #endif // CATA_SRC_FACTION_H
