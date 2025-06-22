@@ -34,6 +34,7 @@
       { "id": "scratch_humanoid" }
     ],
     "death_drops": "default_zombie_death_drops",
+    "death_function": { "eoc": "EOC_CHECK_FIRST_ZOMBIE_KILL" },
     "burn_into": "mon_zombie_scorched",
     "fungalize_into": "mon_zombie_dusted",
     "upgrades": { "half_life": 120, "into_group": "GROUP_ZOMBIE_UPGRADE" },
@@ -52,6 +53,29 @@
       "FILTHY"
     ],
     "armor": { "electric": 1 }
+  },
+  {
+    "type": "effect_on_condition",
+    "id": "EOC_CHECK_FIRST_ZOMBIE_KILL",
+    "//COMMENT": "The alpha talker represents the killer. We check that there *was* a killer, and that the killer was the avatar. Otherwise we just abort here.",
+    "condition": "has_alpha",
+    "effect": [
+      {
+        "if": { "and": [ { "npc_has_species": "HUMAN" }, "u_is_avatar", "math": [ "u_killed_first_humanoid == 0" ] ] },
+        "then": { "run_eocs": [ "EOC_FIRST_ZOMBIE_KILL_AFTERMATH" ] }
+      }
+    ]
+  },
+  {
+    "type": "effect_on_condition",
+    "id": "EOC_FIRST_ZOMBIE_KILL_AFTERMATH",
+    "effect": [
+      { "math": [ "u_killed_first_humanoid = 1" ] },
+      {
+        "if": { "and": [ { "npc_has_species": "HUMAN" }, "u_is_avatar", "math": [ "u_killed_first_humanoid == 0" ] ] },
+        "then": { "run_eocs": [ "EOC_FIRST_ZOMBIE_KILL_AFTERMATH" ] }
+      }
+    ]
   },
   {
     "id": "mon_beekeeper",
