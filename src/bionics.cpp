@@ -2334,8 +2334,6 @@ ret_val<void> Character::is_installable( const item *it, const bool by_autodoc )
     return has_bionic( b );
     } ) ) {
         return ret_val<void>::make_failure( _( "Superior version installed." ) );
-    } else if( is_npc() && !bid->has_flag( json_flag_BIONIC_NPC_USABLE ) ) {
-        return ret_val<void>::make_failure( _( "CBM not compatible with patient." ) );
     }
 
     return ret_val<void>::make_success( std::string() );
