@@ -122,7 +122,8 @@ void uilist_impl::draw_controls()
 
         float entry_height = ImGui::GetTextLineHeightWithSpacing();
         ImGuiStyle &style = ImGui::GetStyle();
-        if( ImGui::BeginChild( "scroll", parent.calculated_menu_size ) ) {
+        if( ImGui::BeginChild( "scroll", parent.calculated_menu_size, ImGuiChildFlags_None | ImGuiChildFlags_AutoResizeY,
+                               ImGuiWindowFlags_None ) ) {
             if( ImGui::BeginTable( "menu items", 3, ImGuiTableFlags_SizingFixedFit ) ) {
                 ImGui::TableSetupColumn( "hotkey", ImGuiTableColumnFlags_WidthFixed,
                                          parent.calculated_hotkey_width );
@@ -147,7 +148,7 @@ void uilist_impl::draw_controls()
 
                         if( is_selected && parent.need_to_scroll ) {
                             // this is the selected row, and the user just changed the selection; scroll it into view
-                            ImGui::SetScrollHereY();
+ 							//ImGui::SetScrollY(i * entry_height);
                             parent.need_to_scroll = false;
                         }
                         ImGuiSelectableFlags flags = ImGuiSelectableFlags_SpanAllColumns |
@@ -202,6 +203,7 @@ void uilist_impl::draw_controls()
                         ImGui::PopID();
                     }
                 }
+				ImGui::SetScrollY(parent.selected * entry_height);
                 ImGui::EndTable();
             }
         }
