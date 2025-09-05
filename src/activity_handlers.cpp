@@ -582,12 +582,20 @@ void activity_handlers::game_do_turn( player_activity *act, Character *you )
 
 void activity_handlers::pickaxe_do_turn( player_activity *act, Character * )
 {
-    const tripoint_bub_ms &pos = get_map().get_bub( act->placement );
+    const map &here = get_map();
+    const tripoint_bub_ms &pos = here.get_bub( act->placement );
     sfx::play_activity_sound( "tool", "pickaxe", sfx::get_heard_volume( pos ) );
     // each turn is too much
     if( calendar::once_every( 1_minutes ) ) {
         //~ Sound of a Pickaxe at work!
         sounds::sound( pos, 30, sounds::sound_t::destructive_activity, _( "CHNK!  CHNK!  CHNK!" ) );
+    }
+    if( calendar::once_every( 15_minutes ) ) {
+        const int max_damage_to_set = here.bash_resistance( pos, true );
+        const int existing_damage = here.get_map_damage( pos );
+        const int set_damage_to = std::min( existing_damage + 1, max_damage_to_set );
+        // Note: Not const map &, but only for this specific call.
+        get_map().set_map_damage( pos, set_damage_to );
     }
 }
 

@@ -3143,8 +3143,11 @@ static std::optional<int> dig_tool( Character *p, item *it, const tripoint_bub_m
         return std::nullopt;
     }
 
-    // FIXME: Activity is interruptable but progress is not saved!
-    time_duration digging_time = 30_minutes;
+    // The act increments map damage by 1 for every 15 minutes, so we discount 15 minutes of activity for every existing map damage.
+    // As an added bonus, this also allows **mixing and matching** of smashing and mining.
+    // You could mine a wall for a bit until it's weak and then bash your way through what's left. Or the reverse!
+    const int existing_damage = here.get_map_damage( pnt );
+    time_duration digging_time = 8_hours - ( existing_damage * 15_minutes );
 
     if( here.has_flag( ter_furn_flag::TFLAG_FLAT, pnt ) ) {
         // We're breaking up some flat surface like pavement, which is much easier
