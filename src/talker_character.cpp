@@ -1068,16 +1068,6 @@ void talker_character::set_sleep_deprivation( int amount )
     me_chr->set_sleep_deprivation( amount );
 }
 
-void talker_character::set_kill_xp( int amount )
-{
-    me_chr->kill_xp = amount;
-}
-
-int talker_character_const::get_kill_xp() const
-{
-    return me_chr_const->kill_xp;
-}
-
 void talker_character::set_age( int amount )
 {
     int years_since_cataclysm = to_turns<int>( calendar::turn - calendar::turn_zero ) /

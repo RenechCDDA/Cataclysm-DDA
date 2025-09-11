@@ -999,11 +999,6 @@
         "condition": { "math": [ "u_item_count('bottle_glass') == 3" ] }
       },
       {
-        "text": "Has more or equal to 35 experience.",
-        "topic": "TALK_DONE",
-        "condition": { "math": [ "u_val('exp') >= 35" ] }
-      },
-      {
         "text": "Highest spell level in school test_trait is 1.",
         "topic": "TALK_DONE",
         "condition": { "math": [ "u_school_level('test_trait') == 1" ] }

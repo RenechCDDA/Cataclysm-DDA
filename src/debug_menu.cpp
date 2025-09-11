@@ -2423,7 +2423,7 @@ static void character_edit_menu()
         D_DESC, D_SKILLS, D_THEORY, D_PROF, D_STATS, D_SPELLS, D_ITEMS, D_DELETE_ITEMS, D_DROP_ITEMS, D_ITEM_WORN, D_RADS,
         D_HP, D_STAMINA, D_MORALE, D_PAIN, D_NEEDS, D_NORMALIZE_BODY, D_HEALTHY, D_STATUS, D_MISSION_ADD, D_MISSION_EDIT,
         D_TELE, D_MUTATE, D_BIONICS, D_CLASS, D_ATTITUDE, D_OPINION, D_PERSONALITY, D_ADD_EFFECT, D_ASTHMA, D_PRINT_VARS,
-        D_WRITE_EOCS, D_KILL_XP, D_CHECK_TEMP, D_EDIT_VARS, D_FACTION, D_ALPHA_EOC, D_BETA_EOC
+        D_WRITE_EOCS, D_CHECK_TEMP, D_EDIT_VARS, D_FACTION, D_ALPHA_EOC, D_BETA_EOC
     };
     nmenu.addentry( D_DESC, true, 'D', "%s",
                     _( "Edit description - name, age, height or blood type" ) );
@@ -2444,9 +2444,6 @@ static void character_edit_menu()
     nmenu.addentry( D_HEALTHY, true, 'a', "%s", _( "Set health" ) );
     nmenu.addentry( D_NEEDS, true, 'n', "%s", _( "Set needs" ) );
     nmenu.addentry( D_NORMALIZE_BODY, true, 'N', "%s", _( "Normalize body stats" ) );
-    if( get_option<bool>( "STATS_THROUGH_KILLS" ) ) {
-        nmenu.addentry( D_KILL_XP, true, 'X', "%s", _( "Set kill XP" ) );
-    }
     nmenu.addentry( D_MUTATE, true, 'u', "%s", _( "Mutate" ) );
     nmenu.addentry( D_BIONICS, true, 'b', "%s", _( "Edit [b]ionics" ) );
     nmenu.addentry( D_STATUS, true,
@@ -2551,13 +2548,6 @@ static void character_edit_menu()
                 int morale_level_delta = value - you.get_morale_level();
                 you.add_morale( morale_perm_debug, morale_level_delta );
                 you.apply_persistent_morale();
-            }
-        }
-        break;
-        case D_KILL_XP: {
-            int value = you.kill_xp;
-            if( query_int( value, true, _( "Set kill XP to?" ) ) ) {
-                you.kill_xp = value;
             }
         }
         break;

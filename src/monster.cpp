@@ -238,11 +238,6 @@ static const std::map<monster_attitude, std::pair<std::string, color_id>> attitu
     {monster_attitude::MATT_NULL, {translate_marker( "BUG: Behavior unnamed." ), def_h_red}},
 };
 
-static int compute_kill_xp( const mtype_id &mon_type )
-{
-    return mon_type->difficulty + mon_type->difficulty_base;
-}
-
 monster::monster()
 {
     unset_dest();
@@ -3065,7 +3060,7 @@ void monster::die( map *here, Creature *nkiller )
         }
         if( !is_hallucination() && ch != nullptr ) {
             cata::event e = cata::event::make<event_type::character_kills_monster>( ch->getID(), type->id,
-                            compute_kill_xp( type->id ) );
+                            type->difficulty );
             get_event_bus().send_with_talker( ch, this, e );
         }
     }

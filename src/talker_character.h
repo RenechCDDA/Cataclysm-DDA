@@ -187,7 +187,6 @@ class talker_character_const: virtual public const_talker
         int get_pkill() const override;
         int get_stamina() const override;
         int get_sleep_deprivation() const override;
-        int get_kill_xp() const override;
         int get_age() const override;
         int get_ugliness() const override;
         int get_height() const override;
@@ -306,7 +305,6 @@ class talker_character: virtual public talker
         void set_pkill( int ) override;
         void set_stamina( int ) override;
         void set_sleep_deprivation( int ) override;
-        void set_kill_xp( int ) override;
         void set_age( int ) override;
         void set_height( int ) override;
         void add_bionic( const bionic_id &new_bionic ) override;

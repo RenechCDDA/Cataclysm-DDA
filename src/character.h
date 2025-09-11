@@ -576,10 +576,6 @@ class Character : public Creature, public visitable
         int ppen_per;
         int ppen_spd;
 
-        int kill_xp = 0;
-        // Level-up points spent on Stats through Kills
-        int spent_upgrade_points = 0;
-
         float cached_organic_size;
 
         const profession *prof;

@@ -587,9 +587,6 @@ class const_talker
         virtual int get_difficulty() const {
             return 0;
         }
-        virtual int get_kill_xp() const {
-            return 0;
-        }
         virtual int get_age() const {
             return 0;
         }
@@ -854,7 +851,6 @@ class talker: virtual public const_talker
         virtual void set_friendly( int ) {}
         virtual void add_morale( const morale_type &, int, int, time_duration, time_duration, bool ) {}
         virtual void remove_morale( const morale_type & ) {}
-        virtual void set_kill_xp( int ) {}
         virtual void set_age( int ) {}
         virtual void set_height( int ) {}
         virtual void set_npc_trust( int ) {}

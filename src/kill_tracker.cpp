@@ -86,16 +86,6 @@ int kill_tracker::total_kill_count() const
     return monster_kill_count() + npc_kill_count();
 }
 
-int kill_tracker::legacy_kill_xp() const
-{
-    int ret = 0;
-    for( const std::pair<const mtype_id, int> &pair : kills ) {
-        ret += ( pair.first->difficulty + pair.first->difficulty_base ) * pair.second;
-    }
-    ret += npc_kills.size() * 10;
-    return ret;
-}
-
 void kill_tracker::clear()
 {
     kills.clear();
@@ -114,8 +104,6 @@ static Character *get_avatar_or_follower( const character_id &id )
     return nullptr;
 }
 
-static constexpr int npc_kill_xp = 10;
-
 void kill_tracker::notify( const cata::event &e )
 {
     switch( e.type() ) {
@@ -124,7 +112,6 @@ void kill_tracker::notify( const cata::event &e )
             if( Character *killer = get_avatar_or_follower( killer_id ) ) {
                 const mtype_id victim_type = e.get<mtype_id>( "victim_type" );
                 kills[victim_type]++;
-                killer->kill_xp += e.get<int>( "exp" );
                 victim_type.obj().families.practice_kill( *killer );
             }
             break;
@@ -134,7 +121,6 @@ void kill_tracker::notify( const cata::event &e )
             if( Character *killer = get_avatar_or_follower( killer_id ) ) {
                 const std::string victim_name = e.get<cata_variant_type::string>( "victim_name" );
                 npc_kills.push_back( victim_name );
-                killer->kill_xp += npc_kill_xp;
             }
             break;
         }

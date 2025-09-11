@@ -368,7 +368,7 @@ struct event_spec<event_type::character_kills_monster> {
     static constexpr std::array<event_field, 3> fields = {{
             { "killer", cata_variant_type::character_id },
             { "victim_type", cata_variant_type::mtype_id },
-            { "exp", cata_variant_type::int_},
+            { "difficulty", cata_variant_type::int_},
         }
     };
 };
