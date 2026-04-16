@@ -515,6 +515,7 @@
     "id": "smart_watch",
     "name": { "str": "smart watch", "str_pl": "smart watches" },
     "category": "clothing",
+    "ascii_picture": "smart_watch",
     "volume": "125 ml",
     "description": "A touchscreen watch that comes with many uses, such as a calendar, alarm, and even a fitness app, for when you want to check your health on the go!",
     "weight": "61 g",
