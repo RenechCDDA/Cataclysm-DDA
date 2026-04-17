@@ -122,6 +122,7 @@
       "     .                  ."
     ]
   },
+  {
    "type": "ascii_art",
     "id": "smart_watch",
     "picture": [
@@ -1098,7 +1099,6 @@
       "                                         ",
       "                                         "
     ]
-  }
 },
   {
     "type": "ascii_art",
@@ -1135,7 +1135,6 @@
       "               <color_white>\\\\//_____//</color>               ",
       "                                         "
     ]
-  }
  },
   {
     "type": "ascii_art",
@@ -1209,7 +1208,6 @@
       "                  <color_brown>──</color>                     ",
       "                                         "
     ]
-  }
 },
   {
     "type": "ascii_art",
@@ -1222,7 +1220,7 @@
       "               <color_dark_gray>▀</color><color_white>-</color><color_dark_gray>]</color>      <color_dark_gray>[</color><color_white>-</color><color_dark_gray>▀</color>              ",
       "               <color_dark_gray>▀</color><color_white>-</color><color_dark_gray>|</color>      <color_dark_gray>|</color><color_white>-</color><color_dark_gray>▀</color>              ",
       "               <color_dark_gray>▀</color><color_white>-</color><color_dark_gray>|</color>      <color_dark_gray>|</color><color_white>-</color><color_dark_gray>▀</color>              ",
-      "                 <color_dark_gray>/</color> <color_white>:"":</color> <color_dark_gray>\\</color>                ",
+      "                 <color_dark_gray>/</color> <color_white>:",":</color> <color_dark_gray>\\</color>                ",
       "                 <color_dark_gray>^+</color><color_white>|__|</color><color_dark_gray>+^</color>                ",
       "                  <color_white>|││││|</color>                 ",
       "                  <color_white>|││││|</color>                 ",
@@ -1266,7 +1264,6 @@
       "                                         ",
       "                                         "
     ]
-  }
 },
   {
     "type": "ascii_art",
