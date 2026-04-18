@@ -527,5 +527,12 @@
         "run_eoc_selector": [ "EOC_DRAW_TAROT_FULL", "EOC_DRAW_TAROT_MAJOR" ]
       }
     ]
+  },
+  {
+    "type": "effect_on_condition",
+    "id": "EOC_change_gender",
+    "condition": { "and": [ "u_is_character", { "math": [ "u_gender() == 1" ] } ] },
+    "effect": [ { "math": [ "u_gender() = 0" ] } ],
+    "false_effect": [ { "math": [ "u_gender() = 1" ] } ]
   }
 ]
