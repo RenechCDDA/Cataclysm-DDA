@@ -14,6 +14,7 @@
     ],
     "active_procgen_values": [
       { "weight": 100, "spell_id": "AEA_ADRENALINE", "base_power": 250 },
+      { "weight": 100, "spell_id": "AEA_GENDER", "base_power": 250 },
       { "weight": 100, "spell_id": "AEA_BLOOD", "base_power": 0 },
       { "weight": 100, "spell_id": "AEA_HEAL", "base_power": 500 },
       { "weight": 100, "spell_id": "AEA_CONFUSED", "base_power": 250 },
@@ -240,6 +241,7 @@
     "active_procgen_values": [
       { "weight": 100, "spell_id": "AEA_BLOOD", "base_power": -25 },
       { "weight": 100, "spell_id": "AEA_HEAL", "base_power": 500 },
+      { "weight": 100, "spell_id": "AEA_GENDER", "base_power": 250 },
       { "weight": 100, "spell_id": "AEA_CONFUSED", "base_power": 250 },
       { "weight": 100, "spell_id": "AEA_PAIN", "base_power": -150 },
       { "weight": 100, "spell_id": "AEA_TELEPORT", "base_power": -50 },
@@ -465,6 +467,7 @@
     ],
     "active_procgen_values": [
       { "weight": 100, "spell_id": "AEA_ADRENALINE", "base_power": 250 },
+      { "weight": 100, "spell_id": "AEA_GENDER", "base_power": 250 },
       { "weight": 100, "spell_id": "AEA_BLOOD", "base_power": -25 },
       { "weight": 100, "spell_id": "AEA_HEAL", "base_power": 400 },
       { "weight": 100, "spell_id": "AEA_CONFUSED", "base_power": 200 },
