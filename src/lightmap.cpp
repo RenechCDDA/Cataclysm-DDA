@@ -1334,13 +1334,60 @@ void map::build_seen_cache( const tripoint_bub_ms &origin, const int target_z, i
             ( *mocache )[mirror_pos.x()][mirror_pos.y()] = LIGHT_TRANSPARENCY_OPEN_AIR;
         }
 
-        // TODO: Factor in the mirror facing and only cast in the
-        // directions the player's line of sight reflects to.
-        //
-        // The naive solution of making the mirrors act like a second player
-        // at an offset appears to give reasonable results though.
-        castLightAll<float, float, sight_calc, sight_check, update_light, accumulate_transparency>(
-            *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+        if( is_camera ) {
+            // Cameras remain bullshit.
+            castLightAll<float, float, sight_calc, sight_check, update_light, accumulate_transparency>(
+                *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+            continue; // The next part is just for mirrors.
+        }
+
+
+        float angle_to_mirror = atan2f( mirror_pos.y() - origin.y(),
+                                        mirror_pos.x() - origin.x() );
+        double pi = 2 * acos( 0.0 );
+        // move from -pi to pi, to 0 to 2pi for angles
+        if( angle_to_mirror < 0 ) {
+            angle_to_mirror = angle_to_mirror + 2 * pi;
+        }
+
+        double quadrant_slice = pi / 2;
+
+        // Factor in the mirror facing and only cast in the directions the player's line of sight reflects to.
+        // We do this by advancing "clockwise"... if the player is NE of the mirror their view bounces SE.
+        // If the player is SE it bounces SW. Repeat.
+        if( 0 <= angle_to_mirror && angle_to_mirror <= quadrant_slice ) {
+            // results in [-1,-1] aka SE
+            castLight < 0, 1, 1, 0, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+            castLight < 1, 0, 0, 1, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+        } else if( quadrant_slice <= angle_to_mirror && angle_to_mirror <= quadrant_slice * 2 ) {
+            // results in [1,-1] aka SW
+            castLight < 0, -1, 1, 0, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+            castLight < -1, 0, 0, 1, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+        } else if( quadrant_slice * 2 <= angle_to_mirror && angle_to_mirror <= quadrant_slice * 3 ) {
+            // results in [-1,1] aka NE
+            castLight < 0, 1, -1, 0, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+            castLight < 1, 0, 0, -1, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+        } else if( quadrant_slice * 3 <= angle_to_mirror && angle_to_mirror <= quadrant_slice * 4 ) {
+            // results in [1,1] aka NW
+            castLight < 0, -1, -1, 0, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+            castLight < -1, 0, 0, -1, float, float, sight_calc, sight_check, update_light,
+                      accumulate_transparency > (
+                          *mocache, transparency_cache, mirror_pos.xy(), offsetDistance );
+        }
     }
 }
 
