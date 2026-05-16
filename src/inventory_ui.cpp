@@ -566,6 +566,11 @@ void uistatedata::deserialize( const JsonObject &jo )
     jo.read( "lastreload", lastreload );
 }
 
+item_location inventory_entry::topmost_parent() const
+{
+    return parent_struct.topmost_parent;
+}
+
 static const selection_column_preset selection_preset{};
 
 bool inventory_entry::is_hidden( std::optional<bool> const &hide_entries_override ) const
@@ -578,15 +583,18 @@ bool inventory_entry::is_hidden( std::optional<bool> const &hide_entries_overrid
         return true;
     }
 
-    if( !topmost_parent ) {
+    if( !topmost_parent() ) {
         return false;
     }
 
     item_location item = locations.front();
-    if( hide_entries_override && topmost_parent && topmost_parent->is_container() ) {
+    if( hide_entries_override && topmost_parent() && topmost_parent()->is_container() ) {
         return *hide_entries_override;
     }
-    while( item.has_parent() && item != topmost_parent ) {
+    if( parent_struct.true_show_all_false_show_none.value_or( false ) ) {
+        return !parent_struct.true_show_all_false_show_none.value();
+    }
+    while( item.has_parent() && item != topmost_parent() ) {
         if( item.parent_pocket()->settings.is_collapsed() ) {
             return true;
         }
@@ -2364,7 +2372,7 @@ bool inventory_selector::highlight( const item_location &loc, bool hidden, bool 
         if( hidden ) {
             if( inventory_entry *ent = elem->find_by_location( loc, true ) ) {
                 item_location const &parent = ent->is_collation_entry() ? ent->collation_meta->tip :
-                                              ent->topmost_parent;
+                                              ent->topmost_parent();
                 if( !parent ) {
                     continue;
                 }

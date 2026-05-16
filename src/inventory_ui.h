@@ -79,6 +79,36 @@ class inventory_entry
     public:
         std::vector<item_location> locations;
 
+        struct parents {
+            parents() = default;
+            explicit parents( item_location parent ) :
+                topmost_parent( parent ) {
+                if( topmost_parent ) {
+                    bool all_hidden = true;
+                    bool all_visible = true;
+                    for( item_pocket *pckt :  topmost_parent->get_standard_pockets() ) {
+                        if( pckt->settings.is_collapsed() ) {
+                            all_visible = false;
+                        } else {
+                            all_hidden = false;
+                        }
+                    }
+                    if( all_visible ) {
+                        true_show_all_false_show_none = true;
+                    } else if( all_hidden ) {
+                        true_show_all_false_show_none = false;
+                    } else {
+                        true_show_all_false_show_none = std::nullopt;
+                    }
+                }
+            }
+            item_location topmost_parent;
+            // true if all pockets are visible, false if no pockets are visible, std::nullopt if it's mixed.
+            std::optional<bool> true_show_all_false_show_none = std::nullopt;
+        };
+        // topmost visible parent, used for visibility checks
+        parents parent_struct;
+
         size_t chosen_count = 0;
         int custom_invlet = INT_MIN;
         std::string *cached_name = nullptr;
@@ -108,11 +138,11 @@ class inventory_entry
                                   item_location topmost_parent = {}, bool chevron = false ) :
             locations( locations ),
             chosen_count( chosen_count ),
-            topmost_parent( std::move( topmost_parent ) ),
             generation( generation_number ),
             chevron( chevron ),
             enabled( enabled ),
             custom_category( custom_category ) {
+            parent_struct = parents( std::move( topmost_parent ) );
         }
 
         bool operator==( const inventory_entry &other ) const;
@@ -188,8 +218,7 @@ class inventory_entry
         bool highlight_as_parent = false;
         bool highlight_as_child = false;
         bool collapsed = false;
-        // topmost visible parent, used for visibility checks
-        item_location topmost_parent;
+        item_location topmost_parent() const;
         std::shared_ptr<collation_meta_t> collation_meta;
         size_t generation = 0;
         // for collation; true = header, false = entry
