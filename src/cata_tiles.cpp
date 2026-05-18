@@ -440,7 +440,7 @@ void cata_tiles::draw( const point &dest, const tripoint_bub_ms &center, int wid
                        std::multimap<point, formatted_text> &overlay_strings,
                        color_block_overlay_container &color_blocks )
 {
-    if( !g ) {
+    if( !g || g->master_override_dont_redraw ) {
         return;
     }
 

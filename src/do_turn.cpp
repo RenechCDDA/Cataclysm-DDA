@@ -608,6 +608,10 @@ bool game::do_turn()
         u.activity.do_turn( u );
     }
 
+    if( !u.activity && g->master_override_dont_redraw ) {
+        g->master_override_dont_redraw = false;
+    }
+
     // Process NPC sound events before they move or they hear themselves talking
     for( npc &guy : all_npcs() ) {
         if( rl_dist( guy.pos_bub(), u.pos_bub() ) < MAX_VIEW_DISTANCE ) {
