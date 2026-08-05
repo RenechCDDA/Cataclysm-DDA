@@ -84,6 +84,8 @@ static const quality_id qual_CUT_FINE( "CUT_FINE" );
 static const skill_id skill_firstaid( "firstaid" );
 static const skill_id skill_survival( "survival" );
 
+static const species_id species_HUMAN( "HUMAN" );
+
 namespace io
 {
     // *INDENT-OFF*
@@ -1306,8 +1308,13 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
         }
         return false;
     };
-    auto is_enabled = [&]( butcher_type bt ) {
-        if( bt == butcher_type::DISMEMBER ) {
+    auto is_enabled = [&]( butcher_type bt, const mtype * mon ) {
+        const bool is_human_or_npc = ( mon && mon->in_species( species_HUMAN ) ) ||
+                                     !mon ||
+                                     ( mon && mon->id.is_null() );
+        if( bt == butcher_type::TAXIDERMY && is_human_or_npc ) {
+            return false;
+        } else if( bt == butcher_type::DISMEMBER ) {
             return true;
         } else if( !enough_light
                    || ( bt == butcher_type::FIELD_DRESS && !has_organs )
@@ -1341,7 +1348,8 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
     smenu.desc_enabled = true;
     smenu.title = _( "Choose type of butchery:" );
 
-    smenu.addentry_col( static_cast<int>( butcher_type::QUICK ), is_enabled( butcher_type::QUICK ),
+    smenu.addentry_col( static_cast<int>( butcher_type::QUICK ),
+                        is_enabled( butcher_type::QUICK, corpses[index]->get_mtype() ),
                         'B', _( "Quick butchery" )
                         + progress_str( butcher_type::QUICK ),
                         time_or_disabledreason( butcher_type::QUICK ),
@@ -1353,7 +1361,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "Prevents zombies from raising." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::FULL ),
-                        is_enabled( butcher_type::FULL ),
+                        is_enabled( butcher_type::FULL, corpses[index]->get_mtype() ),
                         'b', _( "Full butchery" )
                         + progress_str( butcher_type::FULL ),
                         time_or_disabledreason( butcher_type::FULL ),
@@ -1365,7 +1373,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "but it is time consuming." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::FIELD_DRESS ),
-                        is_enabled( butcher_type::FIELD_DRESS ),
+                        is_enabled( butcher_type::FIELD_DRESS, corpses[index]->get_mtype() ),
                         'f', _( "Field dress corpse" )
                         + progress_str( butcher_type::FIELD_DRESS ),
                         time_or_disabledreason( butcher_type::FIELD_DRESS ),
@@ -1377,7 +1385,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "better effects." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::SKIN ),
-                        is_enabled( butcher_type::SKIN ),
+                        is_enabled( butcher_type::SKIN, corpses[index]->get_mtype() ),
                         's', _( "Skin corpse" )
                         + progress_str( butcher_type::SKIN ),
                         time_or_disabledreason( butcher_type::SKIN ),
@@ -1389,7 +1397,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "scraps that can be used in other ways." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::BLEED ),
-                        is_enabled( butcher_type::BLEED ),
+                        is_enabled( butcher_type::BLEED, corpses[index]->get_mtype() ),
                         'e', _( "Bleed corpse" )
                         + progress_str( butcher_type::BLEED ),
                         time_or_disabledreason( butcher_type::BLEED ),
@@ -1400,7 +1408,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "to do a good job." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::QUARTER ),
-                        is_enabled( butcher_type::QUARTER ),
+                        is_enabled( butcher_type::QUARTER, corpses[index]->get_mtype() ),
                         'q', _( "Quarter corpse" )
                         + progress_str( butcher_type::QUARTER ),
                         time_or_disabledreason( butcher_type::QUARTER ),
@@ -1412,7 +1420,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "harvest them later." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::DISMEMBER ),
-                        is_enabled( butcher_type::DISMEMBER ),
+                        is_enabled( butcher_type::DISMEMBER, corpses[index]->get_mtype() ),
                         'm', _( "Dismember corpse" )
                         + progress_str( butcher_type::DISMEMBER ),
                         time_or_disabledreason( butcher_type::DISMEMBER ),
@@ -1422,7 +1430,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "in a very short amount of time but yields little to no usable flesh." ),
                                 msgFactor ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::DISSECT ),
-                        is_enabled( butcher_type::DISSECT ),
+                        is_enabled( butcher_type::DISSECT, corpses[index]->get_mtype() ),
                         'd', _( "Dissect corpse" )
                         + progress_str( butcher_type::DISSECT ),
                         time_or_disabledreason( butcher_type::DISSECT ),
@@ -1434,7 +1442,7 @@ std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterat
                                    "is most useful here." ),
                                 msgFactorD, dissect_wp_hint ) ) );
     smenu.addentry_col( static_cast<int>( butcher_type::TAXIDERMY ),
-                        is_enabled( butcher_type::TAXIDERMY ),
+                        is_enabled( butcher_type::TAXIDERMY, corpses[index]->get_mtype() ),
                         't', _( "Taxidermy corpse" )
                         + progress_str( butcher_type::TAXIDERMY ),
                         time_or_disabledreason( butcher_type::TAXIDERMY ),
