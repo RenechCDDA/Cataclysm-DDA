@@ -398,11 +398,26 @@ void dialogue_imgui_impl::draw_responses()
         if( should_color_button ) {
             ImGui::PushStyleColor( ImGuiCol_Button, talk.color );
         }
-        if( ImGui::Button( talk.text.c_str() ) ) {
-            sel_response = i;
-            // Handled in dialogue::opt_imgui() with all other inputs.
-            user_clicked_response_button = true;
+
+        // Naive approach.
+        const float total_allowed_width = ImGui::GetWindowWidth() - ImGui::CalcTextSize( ">>>>>    a:   " ).x;
+        const int num_expected_lines = std::ceil( ImGui::CalcTextSize( talk.text.c_str() ).x /
+                                       total_allowed_width ) + 1;
+
+        ImVec2 child_size = { total_allowed_width, ImGui::GetTextLineHeight() *num_expected_lines };
+
+        if( ImGui::BeginChild( talk.text.c_str(), child_size ) ) {
+            const std::string button_name = "##" + talk.text;
+            if( ImGui::Button( button_name.c_str(), ImVec2( -1, -1 ) ) ) {
+                sel_response = i;
+                // Handled in dialogue::opt_imgui() with all other inputs.
+                user_clicked_response_button = true;
+            }
+            ImGui::SetCursorPos( ImVec2( 0, 0 ) ); // Reset our cursor to the top-left of the child window
+            // Draw on top of the button with no label.
+            cataimgui::TextColoredParagraph( c_unset, talk.text );
         }
+        ImGui::EndChild();
         if( should_color_button ) {
             ImGui::PopStyleColor();
         }
